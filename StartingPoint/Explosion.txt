@@ -11,7 +11,6 @@
 > telnet
 
 # What is the name of the service running on port 3389 TCP?
-
 > ms-wbt-server
 
       nmap -sV -T4 10.129.1.13
@@ -31,3 +30,15 @@
       
       Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
       Nmap done: 1 IP address (1 host up) scanned in 12.53 seconds
+
+
+# What is the switch used to specify the target host's IP address when using xfreerdp?
+>  /v:
+
+# TOOL! xfreerdp3 <-- REMOTEDESKTOP
+
+# What username successfully returns a desktop projection to us with a blank password?
+> Administrator
+
+# Submit root flag
+> 951fa96d7830c451b536be5a6be008a0
