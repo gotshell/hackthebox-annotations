@@ -1,0 +1,17 @@
+# How many TCP ports are open on the machine?
+> nmap -p- -T5 10.129.83.35
+PORT      STATE SERVICE
+22/tcp    open  ssh
+27017/tcp open  mongod
+
+# Which service is running on port 27017 of the remote host?
+> MongoDB 3.6.8
+
+# What type of database is MongoDB? (Choose: SQL or NoSQL)
+> NoSQL
+
+# What command is used to launch the interactive MongoDB shell from the terminal?
+> mongosh
+
+# What is the command used for listing all the databases present on the MongoDB server? (No need to include a trailing ;)
+> show dbs
