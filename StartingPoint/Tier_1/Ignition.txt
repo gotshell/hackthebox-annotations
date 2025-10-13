@@ -1,0 +1,59 @@
+# Which service version is found to be running on port 80?
+> nmap -sV -sC {target_ip}
+  PORT   STATE SERVICE VERSION
+  80/tcp open  http    nginx 1.14.2
+  |_http-title: Did not follow redirect to http://ignition.htb/
+  |_http-server-header: nginx/1.14.2
+
+# What is the 3-digit HTTP status code returned when you visit http://{machine IP}/?
+> curl -v http://10.129.223.78
+  *   Trying 10.129.223.78:80...
+  * Connected to 10.129.223.78 (10.129.223.78) port 80
+  * using HTTP/1.x
+  > GET / HTTP/1.1
+  > Host: 10.129.223.78
+  > User-Agent: curl/8.15.0
+  > Accept: */*
+  > 
+  * Request completely sent off
+  < HTTP/1.1 302 Found
+  < Server: nginx/1.14.2
+  < Date: Mon, 13 Oct 2025 11:52:41 GMT
+  < Content-Type: text/html; charset=UTF-8
+  < Transfer-Encoding: chunked
+  < Connection: keep-alive
+  < Set-Cookie: PHPSESSID=s3d1offjrbg0k4bj993t0480sh; expires=Mon, 13-Oct-2025 12:52:41 GMT; Max-Age=3600; path=/; domain=10.129.223.78; HttpOnly; SameSite=Lax
+  < Location: http://ignition.htb/
+  < Pragma: no-cache
+  < Cache-Control: max-age=0, must-revalidate, no-cache, no-store
+  < Expires: Sun, 13 Oct 2024 11:52:41 GMT
+  < Content-Security-Policy-Report-Only: font-src data: 'self' 'unsafe-inline'; form-action secure.authorize.net test.authorize.net geostag.cardinalcommerce.com geo.cardinalcommerce.com 1eafstag.cardinalcommerce.com 1eaf.cardinalcommerce.com centinelapistag.cardinalcommerce.com centinelapi.cardinalcommerce.com 'self' 'unsafe-inline'; frame-ancestors 'self' 'unsafe-inline'; frame-src fast.amc.demdex.net secure.authorize.net test.authorize.net geostag.cardinalcommerce.com geo.cardinalcommerce.com 1eafstag.cardinalcommerce.com 1eaf.cardinalcommerce.com centinelapistag.cardinalcommerce.com centinelapi.cardinalcommerce.com www.paypal.com www.sandbox.paypal.com player.vimeo.com *.youtube.com 'self' 'unsafe-inline'; img-src assets.adobedtm.com amcglobal.sc.omtrdc.net dpm.demdex.net cm.everesttech.net widgets.magentocommerce.com data: www.googleadservices.com www.google-analytics.com www.paypalobjects.com t.paypal.com www.paypal.com fpdbs.paypal.com fpdbs.sandbox.paypal.com *.vimeocdn.com i.ytimg.com s.ytimg.com data: 'self' 'unsafe-inline'; script-src assets.adobedtm.com secure.authorize.net test.authorize.net www.googleadservices.com www.google-analytics.com www.paypalobjects.com js.braintreegateway.com www.paypal.com geostag.cardinalcommerce.com 1eafstag.cardinalcommerce.com geoapi.cardinalcommerce.com 1eafapi.cardinalcommerce.com songbird.cardinalcommerce.com includestest.ccdc02.com www.sandbox.paypal.com t.paypal.com s.ytimg.com www.googleapis.com vimeo.com www.vimeo.com *.vimeocdn.com www.youtube.com video.google.com 'self' 'unsafe-inline' 'unsafe-eval'; style-src getfirebug.com 'self' 'unsafe-inline'; object-src 'self' 'unsafe-inline'; media-src 'self' 'unsafe-inline'; manifest-src 'self' 'unsafe-inline'; connect-src dpm.demdex.net amcglobal.sc.omtrdc.net www.google-analytics.com geostag.cardinalcommerce.com geo.cardinalcommerce.com 1eafstag.cardinalcommerce.com 1eaf.cardinalcommerce.com centinelapistag.cardinalcommerce.com centinelapi.cardinalcommerce.com 'self' 'unsafe-inline'; child-src http: https: blob: 'self' 'unsafe-inline'; default-src 'self' 'unsafe-inline' 'unsafe-eval'; base-uri 'self' 'unsafe-inline';
+  < X-Content-Type-Options: nosniff
+  < X-XSS-Protection: 1; mode=block
+  < X-Frame-Options: SAMEORIGIN
+  < 
+  * Connection #0 to host 10.129.223.78 left intact
+
+The 302 Found response, together with the Location header, indicates that the resource we requested ( / ) has been (temporarily) moved to http://ignition.htb/ . This means that our assumptions were true.
+
+# What is the virtual host name the webpage expects to be accessed by?
+> ignition.htb
+
+# What is the full path to the file on a Linux computer that holds a local list of domain name to IP address pairs?
+> /etc/hosts
+  Let's modify our local DNS file named hosts located in the /etc directory
+  > echo "{target_IP} ignition.htb" | sudo tee -a /etc/hosts
+
+# Use a tool to brute force directories on the webserver. What is the full URL to the Magento login page?
+> ffuf -u http://ignition.htb/FUZZ -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-small
+
+# Look up the password requirements for Magento and also try searching for the most common passwords of 2023. Which password provides access to the admin account?
+> Qwerty123 
+https://cybernews.com/best-password-managers/most-common-passwords/
+
+# Submit root flag
+> 797d6c988d9dc5865e010b9410f247e0
+
+
+
+
