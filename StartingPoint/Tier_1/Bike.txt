@@ -1,0 +1,81 @@
+# What TCP ports does nmap identify as open? Answer with a list of ports seperated by commas with no spaces, from low to high.
+> nmap -sV -sC {target_IP}
+  PORT      STATE    SERVICE VERSION
+  22/tcp    open     ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.4 (Ubuntu Linux; protocol 2.0)
+  | ssh-hostkey: 
+  |   3072 48:ad:d5:b8:3a:9f:bc:be:f7:e8:20:1e:f6:bf:de:ae (RSA)
+  |   256 b7:89:6c:0b:20:ed:49:b2:c1:86:7c:29:92:74:1c:1f (ECDSA)
+  |_  256 18:cd:9d:08:a6:21:a8:b8:b6:f7:9f:8d:40:51:54:fb (ED25519)
+  80/tcp    open     http    Node.js (Express middleware)
+  |_http-title:  Bike 
+  1801/tcp  filtered msmq
+  3390/tcp  filtered dsc
+  41511/tcp filtered unknown
+  Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+> 22,80
+
+# What software is running the service listening on the http/web port identified in the first question?
+> Node.js
+
+# What is the name of the Web Framework according to Wappalyzer?
+> Express
+
+What is Node.js?
+Node.js is an open-source, cross-platform, back-end JavaScript runtime environment that can be used to build
+scalable network applications.
+What is Express?
+Express is a minimal and flexible Node.js web application framework that provides a robust set of features for web
+and mobile applications.
+
+# What is the name of the vulnerability we test for by submitting {{7*7}}?
+> Server side template injection
+
+Node.js and Python web backend servers often make use of a software called "Template Engines".
+What is a Template Engine?
+Template Engines are used to display dynamically generated content on a web page. They replace the
+variables inside a template file with actual values and display these values to the client (i.e. a user opening a
+page through their browser).
+For instance, if a developer needs to create a user profile page, which will contain Usernames, Emails,
+Birthdays and various other content, that is very hard if not impossible to achieve for multiple different
+users with a static HTML page. The template engine would be used here, along a static "template" that
+contains the basic structure of the profile page, which would then manually fill in the user information and
+display it to the user.
+Template Engines, like all software, are prone to vulnerabilities. The vulnerability that we will be focusing on
+today is called Server Side Template Injection (SSTI).
+What is an SSTI?
+Server-side template injection is a vulnerability where the attacker injects malicious input into a template in order
+to execute commands on the server.
+To put it plainly an SSTI is an exploitation technique where the attacker injects native (to the Template
+Engine) code into a web page. The code is then run via the Template Engine and the attacker gains code
+execution on the affected server.
+This attack is very common on Node.js websites and there is a good possibility that a Template Engine is
+being used to reflect the email that the user inputs in the contact field.
+
+Let's inject some SSI payloads into the email input field. 
+${7*7} --> doesn't work
+{{7*7}} --> gives back an error (below)
+<%= 7*7 %>
+${{7*7}}
+#{7*7}
+"{{7*7}}"
+	
+0	"Error: Parse error on line 1:"
+1	'"{{7*7}}"'
+2	"--^"
+3	"Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 'INVALID'"
+4	"    at Parser.parseError (/root/Backend/node_modules/handlebars/dist/cjs/handlebars/compiler/parser.js:268:19)"
+5	"    at Parser.parse (/root/Backend/node_modules/handlebars/dist/cjs/handlebars/compiler/parser.js:337:30)"
+6	"    at HandlebarsEnvironment.parse (/root/Backend/node_modules/handlebars/dist/cjs/handlebars/compiler/base.js:46:43)"
+7	"    at compileInput (/root/Backend/node_modules/handlebars/dist/cjs/handlebars/compiler/compiler.js:515:19)"
+8	"    at ret (/root/Backend/node_modules/handlebars/dist/cjs/handlebars/compiler/compiler.js:524:18)"
+9	"    at router.post (/root/Backend/routes/handlers.js:15:18)"
+10	"    at Layer.handle [as handle_request] (/root/Backend/node_modules/express/lib/router/layer.js:95:5)"
+11	"    at next (/root/Backend/node_modules/express/lib/router/route.js:137:13)"
+12	"    at Route.dispatch (/root/Backend/node_modules/express/lib/router/route.js:112:3)"
+13	"    at Layer.handle [as handle_request] (/root/Backend/node_modules/express/lib/router/layer.js:95:5)"
+
+
+# What is the templating engine being used within Node.JS?
+> handlebars
+
+
