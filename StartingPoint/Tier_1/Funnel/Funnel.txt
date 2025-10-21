@@ -31,3 +31,5 @@
   -rw-r--r--    1 ftp      ftp           713 Nov 28  2022 welcome_28112022
   226 Directory send OK.
 ftp> mget password_policy.pdf welcome_28112022 // to download
+
+
