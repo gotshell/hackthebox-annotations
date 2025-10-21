@@ -56,5 +56,13 @@ All the steps mentioned there should be completed as soon as possible. If you ha
 We hope that you will have an amazing time with us,  
 The funnel team.   
 
+`ftp christine@10.129.45.200` 
+
+331 Please specify the password.  
+Password:   
+230 Login successful.  
+Remote system type is UNIX.  
+Using binary mode to transfer files.  
+
 
 
