@@ -32,11 +32,18 @@
   226 Directory send OK.
   ftp> `mget password_policy.pdf welcome_28112022` // to download  
 
+# What is the default account password that every new member on the "Funnel" team should change as soon as possible?
+
 password_policy.pdf:
 
 ![screenshot](./img/password_policy.png)
 
-# welcome_28112022
+> funnel123#!#
+
+# Which user has not changed their default password yet?
+
+welcome_28112022: 
+
 Frome: root@funnel.htb  
 To: optimus@funnel.htb albert@funnel.htb andreas@funnel.htb christine@funnel.htb maria@funnel.htb  
 Subject:Welcome to the team!  
@@ -48,4 +55,6 @@ We have set up your accounts that you will need to access our internal infrastra
 All the steps mentioned there should be completed as soon as possible. If you have any questions or concerns   feel free to reach directly to your manager.   
 We hope that you will have an amazing time with us,  
 The funnel team.   
+
+
 
