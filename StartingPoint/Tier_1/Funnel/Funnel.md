@@ -7,19 +7,19 @@
 > 2
 
 ### What is the name of the directory that is available on the FTP server?
-> ftp anonymous@10.129.181.13
-  Connected to 10.129.181.13.
-  220 (vsFTPd 3.0.3)
-  331 Please specify the password.
-  Password: 
-  230 Login successful.
-  Remote system type is UNIX.
-  Using binary mode to transfer files.
-> ftp> ls
-  229 Entering Extended Passive Mode (|||27618|)
+  ftp anonymous@10.129.181.13  
+  Connected to 10.129.181.13.  
+  220 (vsFTPd 3.0.3)  
+  331 Please specify the password.  
+  Password:   
+  230 Login successful.  
+  Remote system type is UNIX.  
+  Using binary mode to transfer files.  
+  ftp> ls  
+  229 Entering Extended Passive Mode (|||27618|)  
   150 Here comes the directory listing.
-  drwxr-xr-x    2 ftp      ftp          4096 Nov 28  2022 mail_backup
-  226 Directory send OK.
+  drwxr-xr-x    2 ftp      ftp          4096 Nov 28  2022 mail_backup  
+  226 Directory send OK.  
 > ftp> cd ftp
   550 Failed to change directory.
 > ftp> cd mail_backup
