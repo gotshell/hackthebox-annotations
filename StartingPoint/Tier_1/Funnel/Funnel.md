@@ -21,13 +21,14 @@
 > drwxr-xr-x    2 ftp      ftp          4096 Nov 28  2022 mail_backup
 
   226 Directory send OK.    
-> ftp> `cd mail_backup`  
+  ftp> `cd mail_backup`  
   250 Directory successfully changed.  
-> ftp> `ls`  
+  ftp> `ls`  
   229 Entering Extended Passive Mode (|||35323|)
   150 Here comes the directory listing.
 > -rw-r--r--    1 ftp      ftp         58899 Nov 28  2022 password_policy.pdf
 > -rw-r--r--    1 ftp      ftp           713 Nov 28  2022 welcome_28112022
+
   226 Directory send OK.
   ftp> `mget password_policy.pdf welcome_28112022` // to download  
 
