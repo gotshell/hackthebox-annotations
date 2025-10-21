@@ -32,4 +32,7 @@
   226 Directory send OK.
 ftp> mget password_policy.pdf welcome_28112022 // to download
 
+password_policy.pdf:
+![screenshot](img/password_policy.png)
+
 
