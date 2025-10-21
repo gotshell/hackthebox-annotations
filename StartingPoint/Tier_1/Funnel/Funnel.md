@@ -72,9 +72,9 @@ ftp> `ls`
 
 christine@funnel:~$ `ss -tl`
 State      Recv-Q      Send-Q      Local Address:Port      Peer Address:Port      Process  
-LISTEN      0          4096    
-LISTEN      0          4096  
-LISTEN      0          128  
-LISTEN      0          4096  
-LISTEN      0          32  
-LISTEN      0          128  
+LISTEN      0          4096         127.0.0.1:39181            0.0.0.0:*  
+LISTEN      0          4096         127.0.0.53%lo:domain       0.0.0.0:*  
+LISTEN      0          128          0.0.0.0:ssh                0.0.0.0:*  
+LISTEN      0          4096         127.0.0.1:postgresql       0.0.0.0:*  
+LISTEN      0          32           *:ftp                      *:*  
+LISTEN      0          128          [::]:ssh                   [::]:*  
