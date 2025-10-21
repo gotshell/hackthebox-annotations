@@ -26,7 +26,7 @@
   ftp> `ls`  
   229 Entering Extended Passive Mode (|||35323|)
   150 Here comes the directory listing.
-> -rw-r--r--    1 ftp      ftp         58899 Nov 28  2022 password_policy.pdf
+> -rw-r--r--    1 ftp      ftp         58899 Nov 28  2022 password_policy.pdf  
 > -rw-r--r--    1 ftp      ftp           713 Nov 28  2022 welcome_28112022
 
   226 Directory send OK.
