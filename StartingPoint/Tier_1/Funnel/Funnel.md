@@ -1,4 +1,3 @@
-
 # How many TCP ports are open?
 > nmap -sT -p- -T5 <target-ip>
   PORT   STATE SERVICE
