@@ -18,7 +18,8 @@
   ftp> ls  
   229 Entering Extended Passive Mode (|||27618|)  
   150 Here comes the directory listing.
-> drwxr-xr-x    2 ftp      ftp          4096 Nov 28  2022 mail_backup  
+> drwxr-xr-x    2 ftp      ftp          4096 Nov 28  2022 mail_backup
+
   226 Directory send OK.    
 > ftp> cd ftp  
   550 Failed to change directory.  
