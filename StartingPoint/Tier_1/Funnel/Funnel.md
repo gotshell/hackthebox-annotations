@@ -1,6 +1,6 @@
 # HTB Starting Point - Tier1 - Funnel 
 ### How many TCP ports are open?
-  nmap -sT -p- -T5 <target-ip>  
+  `nmap -sT -p- -T5 <target-ip>`  
   PORT   STATE SERVICE  
   21/tcp open  ftp  
   22/tcp open  ssh  
