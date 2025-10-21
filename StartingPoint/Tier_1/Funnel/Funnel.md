@@ -19,12 +19,12 @@
   229 Entering Extended Passive Mode (|||27618|)  
   150 Here comes the directory listing.
 > drwxr-xr-x    2 ftp      ftp          4096 Nov 28  2022 mail_backup  
-  226 Directory send OK.  
-> ftp> cd ftp
-  550 Failed to change directory.
-> ftp> cd mail_backup
-  250 Directory successfully changed.
-> ftp> ls
+  226 Directory send OK.    
+> ftp> cd ftp  
+  550 Failed to change directory.  
+> ftp> cd mail_backup  
+  250 Directory successfully changed.  
+> ftp> ls  
   229 Entering Extended Passive Mode (|||35323|)
   150 Here comes the directory listing.
   -rw-r--r--    1 ftp      ftp         58899 Nov 28  2022 password_policy.pdf
