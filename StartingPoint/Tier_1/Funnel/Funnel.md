@@ -33,5 +33,5 @@
 ftp> mget password_policy.pdf welcome_28112022 // to download
 
 password_policy.pdf:
-![screenshot](./StartingPoint/Tier_1/Funnel/img/password_policy.png)
+![screenshot](./img/password_policy.png)
 
