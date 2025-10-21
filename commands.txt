@@ -1,1 +1,31 @@
 # List of useful commands
+`ftp username@ip`
+
+`ss`
+ss (socket statistics) mostra informazioni sui socket di rete (TCP, UDP, raw, unix, ecc.). È il successore veloce di netstat (molto più rapido e con più filtri).
+
+Netid  State      Recv-Q Send-Q Local Address:Port   Peer Address:Port  Process
+
+- Netid: tipo di socket (tcp, udp, unix, raw...)
+- State: stato del socket (LISTEN, ESTAB, TIME-WAIT, CLOSE-WAIT, ...)
+- Recv-Q / Send-Q: quantità di dati in coda (in byte). Se >0 può indicare congestione / applicazione che non legge.
+- Local Address:Port: indirizzo e porta locali
+- Peer Address:Port: indirizzo e porta remoti (per i socket non in LISTEN)
+- Process: (se usi -p e hai privilegi) mostra pid/processo che ha quel socket
+
+-t : mostra solo socket TCP
+-u : mostra solo socket UDP
+-l : mostra solo socket LISTEN (in ascolto)
+-a : mostra tutti (listening + non)
+-n : numeric — non risolve nomi (più veloce, mostra porte numeriche)
+-r : risolve nomi (servizi → nomi, es. 80 → http)
+-p : mostra processo/pid che possiede il socket (serve sudo per molti)
+-s : summary con statistiche generali
+-i : info TCP internals (es. timer)
+-e : extended info (ACL, memory, inode)
+-x : socket UNIX
+-o : mostra informazioni sui timer (utile con TCP)
+
+Esempio: `ss -tulnp` = TCP+UDP, listening, numeric, show process.
+         `ss -tn '( sport = :22 )'` // o dport
+         `sudo ss -tnp dst 1.2.3.4:80` // Trovare il processo che sta usando una socket remota (es. connessione verso 1.2.3.4:80)  
