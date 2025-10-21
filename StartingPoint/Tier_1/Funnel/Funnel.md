@@ -1,11 +1,12 @@
-# How many TCP ports are open?
-> nmap -sT -p- -T5 <target-ip>
+# HTB Starting Point - Tier1 - Funnel 
+### How many TCP ports are open?
+  nmap -sT -p- -T5 <target-ip>
   PORT   STATE SERVICE
   21/tcp open  ftp
   22/tcp open  ssh
 > 2
 
-# What is the name of the directory that is available on the FTP server?
+### What is the name of the directory that is available on the FTP server?
 > ftp anonymous@10.129.181.13
   Connected to 10.129.181.13.
   220 (vsFTPd 3.0.3)
