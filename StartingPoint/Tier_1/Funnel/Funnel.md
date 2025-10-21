@@ -7,7 +7,7 @@
 > 2
 
 ### What is the name of the directory that is available on the FTP server?
-  `ftp anonymous@10.129.181.13`  
+  `ftp anonymous@<target_ip>`  
   Connected to 10.129.181.13.  
   220 (vsFTPd 3.0.3)  
   331 Please specify the password.  
@@ -56,13 +56,25 @@ All the steps mentioned there should be completed as soon as possible. If you ha
 We hope that you will have an amazing time with us,  
 The funnel team.   
 
-`ftp christine@10.129.45.200` 
+`ftp christine@<target_ip>` 
 
 331 Please specify the password.  
 Password:   
 230 Login successful.  
 Remote system type is UNIX.  
 Using binary mode to transfer files.  
+ftp> `ls`
+229 Entering Extended Passive Mode (|||11719|)
+150 Here comes the directory listing.
+226 Directory send OK.
 
+`ssh christine@<target_ip>`
 
-
+christine@funnel:~$ `ss -tl`
+State      Recv-Q      Send-Q      Local Address:Port      Peer Address:Port      Process  
+LISTEN      0          4096    
+LISTEN      0          4096  
+LISTEN      0          128  
+LISTEN      0          4096  
+LISTEN      0          32  
+LISTEN      0          128  
