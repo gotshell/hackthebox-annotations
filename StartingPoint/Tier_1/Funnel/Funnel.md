@@ -78,3 +78,6 @@ LISTEN      0          128          0.0.0.0:ssh                0.0.0.0:*
 LISTEN      0          4096         127.0.0.1:postgresql       0.0.0.0:*  
 LISTEN      0          32           *:ftp                      *:*  
 LISTEN      0          128          [::]:ssh                   [::]:*  
+
+> postgresql
+
