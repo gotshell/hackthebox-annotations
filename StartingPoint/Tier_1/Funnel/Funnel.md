@@ -104,7 +104,37 @@ The third type of tunneling is called Dynamic port forwarding . The main issue w
 
 > local port forwarding
 
+# What is the name of the database that holds the flag?
+
+christine-# `\l`   
+                                                      List of databases
+   Name    |   Owner   | Encoding | Locale Provider |  Collate   |   Ctype    | Locale | ICU Rules |    Access privileges       
+-----------+-----------+----------+-----------------+------------+------------+--------+-----------+-------------------------  
+ christine | christine | UTF8     | libc            | en_US.utf8 | en_US.utf8 |        |           |   
+ postgres  | christine | UTF8     | libc            | en_US.utf8 | en_US.utf8 |        |           |   
+ secrets   | christine | UTF8     | libc            | en_US.utf8 | en_US.utf8 |        |           |   
+ template0 | christine | UTF8     | libc            | en_US.utf8 | en_US.utf8 |        |           | =c/christine           +  
+           |           |          |                 |            |            |        |           | christine=CTc/christine  
+ template1 | christine | UTF8     | libc            | en_US.utf8 | en_US.utf8 |        |           | =c/christine           +  
+           |           |          |                 |            |            |        |           | christine=CTc/christine  
+  
+christine-# `\c secrets`  
+psql (17.6 (Debian 17.6-1), server 15.1 (Debian 15.1-1.pgdg110+1))  
+You are now connected to database "secrets" as user "christine".  
+secrets-# 
 
 
+> secrets
+
+# Could you use a dynamic tunnel instead of local port forwarding? Yes or No.
+> Yes through proxychanis setting the proxy: socks5 127.0.0.1 1234 and using the following command: `proxychains psql -U christine -h localhost -p 5432`
+
+# Submit root flag
+
+secrets=# `SELECT * from flag;`
+              value               
+----------------------------------
+ cf277664b1771217d7006acdea006db1
+(1 row)
 
 
