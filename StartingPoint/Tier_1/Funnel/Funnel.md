@@ -81,3 +81,10 @@ LISTEN      0          128          [::]:ssh                   [::]:*
 
 > postgresql
 
+The SSH protocol is vastly used for maintaining and accessing remote systems in a secure and encrypted way.  
+But, it also offers the possibility to create tunnels that operate over the SSH protocol. More specifically, SSH offers various types of tunnels.  
+
+The first type of tunneling we are going to take a look is called Local port forwarding. When local port forwarding is used, a separate tunnel is created inside the existing valid SSH session that forwards network traffic from a local port on the client's machine over to the remote server's port. Under the hood, SSH allocates a socket listener on the client on the given port. When a  connection is made to this port, the connection is forwarded over the existing SSH session over to the remote server's port.  
+The second type of tunneling is called Remote port forwarding , also known as Reverse Tunneling and as one can imagine it is exactly the opposite operation of a Local port forwarding tunnel . Again, after a successful SSH connection, a separate tunnel is created which SSH uses to redirect incoming traffic to the server's port back to the client. Internally, SSH allocates a socket listener on the server on the given port.  
+When a connection is made to this port, the connection is forwarded over the existing SSH session over to the local client's port.  
+The third type of tunneling is called Dynamic port forwarding . The main issue with both local and remote forwarding is that a local and a remote port have to be defined prior to the creation of the tunnel. To address this issue, one can use dynamic tunneling . Dynamic tunneling, allows the users to specify just one port that will forward the incoming traffic from the client to the server dynamically. The usage of dynamic tunneling relies upon the SOCKS5 protocol.  
