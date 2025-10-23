@@ -95,12 +95,12 @@ The third type of tunneling is called Dynamic port forwarding . The main issue w
 
 # Since you can't access the previously mentioned service from the local machine, you will have to create a tunnel and connect to it from your machine. What is the correct type of tunneling to use? remote port forwarding or local port forwarding?  
 
-`ssh -L 1234:localhost:5432 christine@<target_ip>`
-`psql -U christine -h localhost -p 1234`
-  Password for user christine: 
-  psql (17.6 (Debian 17.6-1), server 15.1 (Debian 15.1-1.pgdg110+1))
-  Type "help" for help.
-  christine=# 
+`ssh -L 1234:localhost:5432 christine@<target_ip>`  
+`psql -U christine -h localhost -p 1234`  
+  Password for user christine:   
+  psql (17.6 (Debian 17.6-1), server 15.1 (Debian 15.1-1.pgdg110+1))  
+  Type "help" for help.  
+  christine=#   
 
 > local port forwarding
 
