@@ -93,4 +93,18 @@ When a connection is made to this port, the connection is forwarded over the exi
 
 The third type of tunneling is called Dynamic port forwarding . The main issue with both local and remote forwarding is that a local and a remote port have to be defined prior to the creation of the tunnel. To address this issue, one can use dynamic tunneling . Dynamic tunneling, allows the users to specify just one port that will forward the incoming traffic from the client to the server dynamically. The usage of dynamic tunneling relies upon the SOCKS5 protocol.  
 
+# Since you can't access the previously mentioned service from the local machine, you will have to create a tunnel and connect to it from your machine. What is the correct type of tunneling to use? remote port forwarding or local port forwarding?  
+
+`ssh -L 1234:localhost:5432 christine@<target_ip>`
+`psql -U christine -h localhost -p 1234`
+  Password for user christine: 
+  psql (17.6 (Debian 17.6-1), server 15.1 (Debian 15.1-1.pgdg110+1))
+  Type "help" for help.
+  christine=# 
+
+> local port forwarding
+
+
+
+
 
