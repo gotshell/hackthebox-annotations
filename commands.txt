@@ -29,3 +29,11 @@ Netid  State      Recv-Q Send-Q Local Address:Port   Peer Address:Port  Process
 Esempio: `ss -tulnp` = TCP+UDP, listening, numeric, show process.
          `ss -tn '( sport = :22 )'` // o dport
          `sudo ss -tnp dst 1.2.3.4:80` // Trovare il processo che sta usando una socket remota (es. connessione verso 1.2.3.4:80)  
+
+# Ricerca file SUID root nel filesystem
+`find / -user root -perm -4000 -print 2>/dev/null`
+find / → avvia la ricerca dalla root (/), cioè in tutto il filesystem.
+-user root → filtra i file di proprietà dell'utente root.
+-perm -4000 → seleziona file con il bit setuid impostato (il valore ottale 4000 corrisponde al bit SUID). L'opzione - davanti a 4000 richiede che tutti i bit specificati siano presenti.
+-print → stampare il percorso dei file trovati (è implicito in molte versioni di find, ma qui è esplicito).
+2>/dev/null → reindirizza gli errori (es. Permission denied) verso /dev/null per non intasare l'output.
