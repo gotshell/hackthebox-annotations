@@ -45,3 +45,6 @@ int main() {
     execl("/bin/bash", "bash", NULL); // sostituisce il processo con /bin/bash.
     return 0; 
 }
+
+# Set the PATH environment variable 
+`export PATH=/tmp:$PATH`
