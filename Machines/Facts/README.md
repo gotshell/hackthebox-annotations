@@ -109,6 +109,12 @@ Now crack the output file with john:
 ```
 john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt
 ```
+<img src="images/passphrase.png" width="500"> 
+```
+> john --show hash.txt
+  id_ed25519:d**********
+  1 password hash cracked, 0 left
+```
 
 
 
