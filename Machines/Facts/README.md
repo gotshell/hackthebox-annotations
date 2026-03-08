@@ -5,10 +5,9 @@
 |------|------|
 | Name | Facts |
 | Platform | Hack The Box |
-| OS | <Linux> |
-| Difficulty | <Easy> |
-| Release Date | <date> |
-| Target IP | <target ip> |
+| OS | Linux |
+| Difficulty | Easy |
+| Release Date | 31st January, 2026 |
 
 ## Overview
 Brief description of the machine and the main techniques used to solve it.
@@ -39,7 +38,7 @@ Initial information gathering and port scanning.
 - 54321/tcp open  http    Golang net/http server  
   http-server-header: MinIO  
   // Port 54321/TCP is open running an HTTP service built with Go, and the HTTP header reveals the server is MinIO, an S3‑compatible object storage service.
-<img src="images/nmap.png" width="500">
+<img src="images/nmap.png" width="500">  
 
 ## Enumeration
 
@@ -70,8 +69,8 @@ Although the disabled attribute can be removed using the browser’s developer t
 ### Exploiting the AJAX Password Endpoint: 
 The vulnerability occurs in the “Change Password” functionality of the application. The target web application is running Camaleon CMS version 2.9.0 (Copyright © 2015–2026), a CMS built on Ruby on Rails. When a password change is initiated, the application sends an AJAX request to /admin/users/[ID]/updated_ajax.
 Although the backend relies on Rails Strong Parameters, the implementation in this specific endpoint does not strictly enforce a whitelist of permitted fields. This oversight makes parameter smuggling possible.
-By intercepting the password change request with Burp Suite, an additional parameter can be appended to the POST body:
-<img src="images/admin_exploit.png" width="500">
+By intercepting the password change request with Burp Suite, an additional parameter can be appended to the POST body:  
+<img src="images/admin_exploit.png" width="500">  
 Even though the request is intended only to update the password, the server processes the extra parameter as well. Due to insufficient parameter filtering, the application ends up modifying the user’s role in the database and elevates the account to Administrator.
 
 ### S3/MinIO Exploitation:  
