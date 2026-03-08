@@ -38,7 +38,14 @@ Initial information gathering and port scanning.
 ```
 > nmap -sT -T4 -sV -p- --script=http-headers {IP_Addr}
 ```
-<img src="images/nmap.png" width="700">
+### Findings:
+- 22/tcp    open  ssh     OpenSSH 9.9p1 Ubuntu 3ubuntu3.2 (Ubuntu Linux; protocol 2.0)
+- 80/tcp    open  http    nginx 1.26.3 (Ubuntu)
+- 54321/tcp open  http    Golang net/http server
+  http-server-header: MinIO
+  // Port 54321/TCP is open running an HTTP service built with Go, and the HTTP header reveals the server is MinIO, an S3‑compatible object storage service.
+<img src="images/nmap.png" width="500">
+
 
 
 
