@@ -3,10 +3,10 @@
 ## Machine Information
 | Field | Value |
 |------|------|
-| Name | <Machine Name> |
+| Name | Facts |
 | Platform | Hack The Box |
-| OS | <Linux / Windows> |
-| Difficulty | <Easy / Medium / Hard / Insane> |
+| OS | <Linux> |
+| Difficulty | <Easy> |
 | Release Date | <date> |
 | Target IP | <target ip> |
 
