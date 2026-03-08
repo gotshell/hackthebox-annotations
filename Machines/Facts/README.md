@@ -36,10 +36,11 @@ Brief description of the machine and the main techniques used to solve it.
 Initial information gathering and port scanning.
 
 ```
-> nmap -sT -T4 -sV -p- {IP_Addr}
+> nmap -sT -T4 -sV -p- --script=http-headers {IP_Addr}
 ```
+<img src="images/nmap.png" width="700">
 
-![nmap scan](images/nmap.png)
+
 
 
 
