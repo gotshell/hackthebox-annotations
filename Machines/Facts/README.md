@@ -70,7 +70,9 @@ Although the disabled attribute can be removed using the browser’s developer t
 The vulnerability occurs in the “Change Password” functionality of the application. The target web application is running Camaleon CMS version 2.9.0 (Copyright © 2015–2026), a CMS built on Ruby on Rails. When a password change is initiated, the application sends an AJAX request to /admin/users/[ID]/updated_ajax.
 Although the backend relies on Rails Strong Parameters, the implementation in this specific endpoint does not strictly enforce a whitelist of permitted fields. This oversight makes parameter smuggling possible.
 By intercepting the password change request with Burp Suite, an additional parameter can be appended to the POST body:  
+
 <img src="images/admin_exploit.png" width="500">  
+
 Even though the request is intended only to update the password, the server processes the extra parameter as well. Due to insufficient parameter filtering, the application ends up modifying the user’s role in the database and elevates the account to Administrator.
 
 ### S3/MinIO Exploitation:  
