@@ -217,7 +217,7 @@ So we can craft the request as following:
 
 ```
 analyst@devhub:/opt$ curl -s -X POST http://127.0.0.1:5000/tools/call \
-  -H 'X-API-Key: opsmcp_secret_key_4f5a6b7c8d9e0f1a' \
+  -H 'X-API-Key: opsmcp_secret_key_<redacted>' \
   -H 'Content-Type: application/json' \
   -d '{"name":"ops._admin_dump","arguments":{"target":"ssh_keys","confirm":true}}'
 ```
