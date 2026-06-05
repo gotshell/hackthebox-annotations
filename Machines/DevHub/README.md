@@ -111,7 +111,7 @@ Let's run LinPeas.sh as always...
 
 <img src="images/linpeas_kernel.png" width="800">   
 
-we see lots of kernel exploits that <SPOILER> won't work because of this:  
+we see lots of juicy kernel exploits that <SPOILER> won't work because of this:  
 
 ```
 > ls -la /etc/modprobe.d/
@@ -129,7 +129,15 @@ we see lots of kernel exploits that <SPOILER> won't work because of this:
   -rw-r--r--   1 root root  154 Oct 28  2025 intel-microcode-blacklist.conf
   -rw-r--r--   1 root root  347 Aug 17  2021 iwlwifi.conf
   -rw-r--r--   1 root root  379 Apr 11  2023 mdadm.conf
-```  
+```
+
+And also because of this:
+```
+> apt list --installed | grep linux-image
+  linux-image-5.15.0-179-generic/jammy-updates,jammy-security,now 5.15.0-179.189 amd64 [installed,automatic] 
+  linux-image-generic/jammy-updates,jammy-security,now 5.15.0.179.163 amd64 [installed,automatic]
+```
+
 But this is fishy:   
 mcp-dev@devhub:~$ ls -la /opt/opsmcp/server.py   
 -rw-r----- 1 analyst analyst 6021 Mar 16 21:49 /opt/opsmcp/server.py  
