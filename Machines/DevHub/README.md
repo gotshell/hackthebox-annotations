@@ -48,4 +48,4 @@ Initial information gathering and port scanning.
 - 80/tcp   open  http    nginx 1.18.0 (Ubuntu)
 - 6274/tcp open  unknown
 ```
-<img src="images/nmap.png" width="500">    
+<img src="images/nmap.PNG" width="500">    
