@@ -240,3 +240,7 @@ root@devhub:~# cat /root/root.txt
 4d5<redacted>
 ```
 
+Got root flag aswell. 
+
+Ez shit. 
+
