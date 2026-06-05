@@ -121,8 +121,8 @@ we see lots of kernel exploits that <SPOILER> won't work because of this:
   -rw-r--r--   1 root root  210 Aug 17  2021 blacklist-firewire.conf
   -rw-r--r--   1 root root  677 Aug 17  2021 blacklist-framebuffer.conf
   -rw-r--r--   1 root root  583 Aug 17  2021 blacklist-rare-network.conf
-  -rw-r--r--   1 root root  264 Apr 30 12:32 disable-algif_aead.conf
-  -rw-r--r--   1 root root   73 May 20 14:30 disable-dirtyfrag.conf
+  -rw-r--r--   1 root root  264 Apr 30 12:32 *disable-algif_aead.conf*
+  -rw-r--r--   1 root root   73 May 20 14:30 *disable-dirtyfrag.conf*
   -rw-r--r--   1 root root  154 Oct 28  2025 intel-microcode-blacklist.conf
   -rw-r--r--   1 root root  347 Aug 17  2021 iwlwifi.conf
   -rw-r--r--   1 root root  379 Apr 11  2023 mdadm.conf
