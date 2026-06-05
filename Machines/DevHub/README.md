@@ -59,7 +59,7 @@ Initial information gathering and port scanning.
 ```
 No luck...
 
-Let's check for MCPJam Vulnerabilities
+Let's check for MCPJam Vulnerabilities  
 <img src="images/MCPJam.png" width="500">     
 
 
