@@ -127,6 +127,14 @@ we see lots of kernel exploits that <SPOILER> won't work because of this:
   -rw-r--r--   1 root root  347 Aug 17  2021 iwlwifi.conf
   -rw-r--r--   1 root root  379 Apr 11  2023 mdadm.conf
 ```  
+But this is fishy:   
+mcp-dev@devhub:~$ ls -la /opt/opsmcp/server.py   
+-rw-r----- 1 analyst analyst 6021 Mar 16 21:49 /opt/opsmcp/server.py  
+
+Unfortunately we don't have access to it, mcp-dev sucks hard like my team members (Love You Vin :*).  
+
+So lets check for listening ports:    
+<img src="images/ss-tulnp.png" width="500">   
 
 
 
