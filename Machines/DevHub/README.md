@@ -1,4 +1,4 @@
-# Hack The Box — Facts Walkthrough
+# Hack The Box — DevHub Walkthrough
 
 ## Machine Information
 | Field | Value |
@@ -6,24 +6,37 @@
 | Name | Facts |
 | Platform | Hack The Box |
 | OS | Linux |
-| Difficulty | Easy |
-| Release Date | 31st January, 2026 |
+| Difficulty | Medium |
+| Release Date | 30th May, 2026 |
 
 ## Overview
-Brief description of the machine and the main techniques used to solve it.
+
+DevHub is a Linux-based Hack The Box machine focused on web enumeration, internal service discovery, credential exposure, and privilege escalation through locally hosted development and operations services.  
+  
+The foothold involves identifying exposed web functionality and pivoting into internal services that are only accessible from the target host. Further enumeration reveals a Jupyter Lab instance and an internal operations MCP service, both of which play a key role in escalating privileges. The machine emphasizes careful process inspection, localhost service enumeration, SSH tunneling, API interaction, and abusing exposed administrative functionality.  
 
 **Skills / Techniques**
-- Enumeration
-- Exploitation
+
+- Web Enumeration
+- Service Enumeration
+- Localhost Service Discovery
+- SSH Port Forwarding
+- Jupyter Lab Token Abuse
+- API Key Discovery
+- Hidden API Endpoint Abuse
 - Privilege Escalation
-- Web / Burp / AWS s3 / Cracking
+- Linux Post-Exploitation Enumeration
 
 ## Table of Contents
+
 - Reconnaissance
 - Enumeration
-- Exploitation
+- Initial Access
+- Internal Service Discovery
+- SSH Tunneling
+- Jupyter Lab Access
 - Privilege Escalation
-- Root / Administrator Access
+- Root Access
 - Lessons Learned
 
 ## Recon
