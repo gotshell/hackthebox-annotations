@@ -42,7 +42,7 @@ The foothold involves identifying exposed web functionality and pivoting into in
 ## Recon
 Initial information gathering and port scanning.
 ```
-> nmap -sV -T4 -p- 10.129.8.222  
+> nmap -sV -T4 -p- <IPADDRESS>  
 ```
 Starting Nmap 7.99 ( https://nmap.org ) at 2026-06-05 06:13 -0400
 Nmap scan report for devhub.htb (10.129.8.222)
