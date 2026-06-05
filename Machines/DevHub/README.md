@@ -162,7 +162,7 @@ And browse: http://127.0.0.1:8888/
 
 NOICE! A Terminal, let's abuse.
 
-<img src="images/user_key.png" width="800">   
+<img src="images/user_Key.png" width="800">   
 
 Got the user flag.  
 I also got ssh access following the same procedure used before.  
