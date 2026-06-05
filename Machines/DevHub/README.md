@@ -60,7 +60,7 @@ Initial information gathering and port scanning.
 No luck...
 
 Let's check for MCPJam Vulnerabilities  
-<img src="images/MCPJam.png" width="500">     
+<img src="images/MCPJam.png" width="1000">     
 
 
 
