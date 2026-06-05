@@ -108,6 +108,9 @@ Attacker machine:
 
 ## Priviledge Escalation  
 Let's run LinPeas.sh as always...  
+
+<img src="images/linpeas_kernel.png" width="800">   
+
 we see lots of kernel exploits that <SPOILER> won't work because of this:  
 
 ```
@@ -133,8 +136,10 @@ mcp-dev@devhub:~$ ls -la /opt/opsmcp/server.py
 
 Unfortunately we don't have access to it, mcp-dev sucks hard like my team members (Love You Vin :*).  
 
-So lets check for listening ports:    
-<img src="images/ss-tulnp.png" width="500">   
+So lets check for listening ports:   
+
+<img src="images/ss-tulnp.png" width="800">   
+
 
 
 
