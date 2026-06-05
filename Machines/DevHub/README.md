@@ -59,8 +59,17 @@ Initial information gathering and port scanning.
 ```
 No luck...
 
-Let's check for MCPJam Vulnerabilities  
+Let's check for MCPJam Vulnerabilities:    
 <img src="images/MCPJam.png" width="1000">     
+
+Nice, the version is vulnerable:  
+https://github.com/advisories/GHSA-232v-j27c-5pp6  
+https://medium.com/@iamkumarraj/exploiting-mcpjam-inspector-understanding-rce-via-api-mcp-connect-2f2791166d2a   
+
+Open BurpSuite and dive the webapp. After MCP server creation we found the juicy POST request:  
+
+<img src="images/addmcp.png" width="500">  
+<img src="images/api_mcp_connect_vulnerable_normal.png" width="1000">  
 
 
 
