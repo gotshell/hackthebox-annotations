@@ -150,7 +150,9 @@ So lets check for listening ports:
 
 Port 5000 and 8888 smell like shit.
 
-### SSH tunnel  
+### SSH Tunnel  
+
+Establish an SSH session  and configure local port forwarding for the target's loopback services on ports 8888 and 5000, exposing Jupyter Lab and the OPSMCP API locally for further interaction.  
 
 ```
 > ssh -i devhub_mcpdev -L 8888:127.0.0.1:8888 -L 5000:127.0.0.1:5000 mcp-dev@devhub.htb  
