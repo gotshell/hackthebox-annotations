@@ -111,7 +111,7 @@ Let's run LinPeas.sh as always...
 
 <img src="images/linpeas_kernel.png" width="800">   
 
-we see lots of juicy kernel exploits that <SPOILER> won't work because of this:  
+We see lots of juicy kernel exploits that <SPOILER> won't work because of this:  
 
 ```
 > ls -la /etc/modprobe.d/
@@ -147,6 +147,28 @@ Unfortunately we don't have access to it, mcp-dev sucks hard like my team member
 So lets check for listening ports:   
 
 <img src="images/ss-tulnp.png" width="800">   
+
+Port 5000 and 8888 smell like shit.
+
+### SSH tunnel  
+
+```
+> ssh -i devhub_mcpdev -L 8888:127.0.0.1:8888 -L 5000:127.0.0.1:5000 mcp-dev@devhub.htb  
+```
+
+And browse: http://127.0.0.1:8888/   
+
+<img src="images/jupiter_lab.png" width="800">   
+
+NOICE! A Terminal, let's abuse.
+
+<img src="images/user_key.png" width="800">   
+
+Got the user flag.  
+I also got ssh access following the same procedure used before.  
+
+
+
 
 
 
