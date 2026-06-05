@@ -71,6 +71,13 @@ Open BurpSuite and dive the webapp. After MCP server creation we found the juicy
 <img src="images/addmcp.png" width="500">  
 <img src="images/api_mcp_connect_vulnerable_normal.png" width="1000">  
 
+## Exploitation
+Now we can craft a malicious request and exploit the vulnerability.  
+<img src="images/MCPJamRCE.png" width="1000">    
+
+
+
+
 
 
 
