@@ -48,4 +48,20 @@ Initial information gathering and port scanning.
 - 80/tcp   open  http    nginx 1.18.0 (Ubuntu)
 - 6274/tcp open  unknown
 ```
-<img src="images/nmap.PNG" width="500">    
+<img src="images/nmap.png" width="500">     
+
+## Enumeration
+```
+> ffuf -w '/path/to/wordlist/SecLists/Discovery/Web-Content/common.txt' -u 'http://devhub.htb/FUZZ' -ac
+> ffuf -w '/path/to/wordlist/SecLists/Discovery/Web-Content/common.txt' -u 'http://devhub.htb:6274/FUZZ' -ac
+> ffuf -w '/path/to/wordlist/SecLists/Discovery/DNS/subdomains-top1million-5000.txt' -u 'http://devhub.htb/' -H "Host: FUZZ.devhub.htb" -ac
+[...]
+```
+No luck...
+
+Let's check for MCPJam Vulnerabilities
+<img src="images/MCPJam.png" width="500">     
+
+
+
+
