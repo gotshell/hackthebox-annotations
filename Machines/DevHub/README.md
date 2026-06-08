@@ -3,7 +3,7 @@
 ## Machine Information
 | Field | Value |
 |------|------|
-| Name | Facts |
+| Name | DevHub |
 | Platform | Hack The Box |
 | OS | Linux |
 | Difficulty | Medium |
