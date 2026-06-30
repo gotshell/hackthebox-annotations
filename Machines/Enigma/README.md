@@ -88,6 +88,7 @@ Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
 We add the machine's IP address to the /etc/hosts file so we can resolve the enigma.htb domain:
 ```
-> echo '<IP ADDRESS>    enigma.htb' | sudo tee -a /etc/hosts
+echo '<IP ADDRESS>    enigma.htb' | sudo tee -a /etc/hosts
 ```
+
 
