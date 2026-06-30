@@ -78,8 +78,18 @@ echo '<IP ADDRESS>    enigma.htb' | sudo tee -a /etc/hosts
 
 The scan reveals a fairly large attack surface: SSH (22), HTTP (80), POP3/IMAP via Dovecot (110, 143, 993, 995), and a full NFS stack (111, 2049, plus the associated mountd, nlockmgr, and status RPC services on various high ports).  
 Browsing to http://enigma.htb on port 80 just shows a static page with no interesting functionality, no obvious parameters, and no exposed endpoints worth digging into. After a quick look, this didn't lead anywhere, so we set it aside and shift our focus to NFS, which stands out given the number of exported services and ports tied to it.  
+
+# NFS Enumeration  
+We start by listing the available NFS exports on the target:  
 ```
 showmount -e <IP ADDRESS> 
 Export list for <IP ADDRESS>: 
 /srv/nfs/onboarding *
+```
+The server exports a single share: /srv/nfs/onboarding. The * means it's accessible from any host that can reach the NFS service, with no IP-based restrictions, this typically means we can mount it directly from our Kali machine.  
+The name onboarding is worth noting, as it suggests this directory might be used to provision new users or employees, which could mean it contains credentials, scripts, or configuration files relevant to gaining initial access.  
+We mount the share locally to inspect its contents:  
+```
+mkdir -p /home/kali/Desktop/HTB/Enigma/enigma_nfs  
+sudo mount -t nfs <IP ADDRESS>:/srv/nfs/onboarding /home/kali/Desktop/HTB/Enigma/enigma_nfs
 ```
