@@ -15,7 +15,10 @@
 
 ## RECON  
 
-# Nmap 7.99 scan initiated Mon Jun 28 15:00:01 2026 as: /usr/lib/nmap/nmap -sC -sV -p- -oN nmap_enigma.txt <IP ADDRESS>  
+```
+nmap -sC -sV -p- -oN nmap_enigma.txt <IP ADDRESS>
+```
+Nmap 7.99 scan initiated Mon Jun 28 15:00:01 2026 as: /usr/lib/nmap/nmap -sC -sV -p- -oN nmap_enigma.txt <IP ADDRESS>  
 Nmap scan report for <IP ADDRESS>  
 Host is up (0.031s latency).  
 Not shown: 65522 closed tcp ports (reset)  
@@ -73,4 +76,10 @@ We add the machine's IP address to the /etc/hosts file so we can resolve the eni
 echo '<IP ADDRESS>    enigma.htb' | sudo tee -a /etc/hosts
 ```
 
-
+The scan reveals a fairly large attack surface: SSH (22), HTTP (80), POP3/IMAP via Dovecot (110, 143, 993, 995), and a full NFS stack (111, 2049, plus the associated mountd, nlockmgr, and status RPC services on various high ports).  
+Browsing to http://enigma.htb on port 80 just shows a static page with no interesting functionality, no obvious parameters, and no exposed endpoints worth digging into. After a quick look, this didn't lead anywhere, so we set it aside and shift our focus to NFS, which stands out given the number of exported services and ports tied to it.  
+```
+showmount -e <IP ADDRESS> 
+Export list for <IP ADDRESS>: 
+/srv/nfs/onboarding *
+```
