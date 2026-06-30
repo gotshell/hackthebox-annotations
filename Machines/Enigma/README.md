@@ -327,7 +327,9 @@ echo 'ssh-ed25519 <MyPUBkey> <redacted>@enigma' >> ~/.ssh/authorized_keys && chm
 This gives us SSH access as <redacted>, which we'll use to set up an SSH tunnel (-L) and forward the locally-bound port 1337 to our machine, letting us reach internal-only services from outside the box.  
 ### Investigating the Local-Only Port 1337  
 Going back to the earlier ss -tulnp output, port 1337 was bound to 127.0.0.1 only. We tunnel it to our attacking machine via SSH, e.g.:  
-``` ssh -i enigma -L 1337:127.0.0.1:1337 <redacted>@enigma.htb ```
+``` 
+ssh -i enigma -L 1337:127.0.0.1:1337 <redacted>@enigma.htb  
+```
 With the tunnel up, we can now reach it locally:  
 ```
 curl -i http://localhost:1337/
@@ -347,7 +349,7 @@ We look for public advisories or CVEs affecting OliveTin:
 [GitHub Advisory - GHSA-49gm-hh7w-wfvf](https://github.com/advisories/GHSA-49gm-hh7w-wfvf)
 [NVD - CVE-2026-27626](https://nvd.nist.gov/vuln/detail/CVE-2026-27626)
 
-
+  
 
 
 
