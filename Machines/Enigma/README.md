@@ -79,7 +79,7 @@ echo '<IP ADDRESS>    enigma.htb' | sudo tee -a /etc/hosts
 The scan reveals a fairly large attack surface: SSH (22), HTTP (80), POP3/IMAP via Dovecot (110, 143, 993, 995), and a full NFS stack (111, 2049, plus the associated mountd, nlockmgr, and status RPC services on various high ports).  
 Browsing to http://enigma.htb on port 80 just shows a static page with no interesting functionality, no obvious parameters, and no exposed endpoints worth digging into. After a quick look, this didn't lead anywhere, so we set it aside and shift our focus to NFS, which stands out given the number of exported services and ports tied to it.  
 
-# NFS Enumeration  
+## NFS Enumeration  
 We start by listing the available NFS exports on the target:  
 ```
 showmount -e <IP ADDRESS> 
@@ -92,4 +92,18 @@ We mount the share locally to inspect its contents:
 ```
 mkdir -p /home/kali/Desktop/HTB/Enigma/enigma_nfs  
 sudo mount -t nfs <IP ADDRESS>:/srv/nfs/onboarding /home/kali/Desktop/HTB/Enigma/enigma_nfs
+```
+## Exploring the NFS Share
+Listing the contents of the mounted share:  
+```
+ls -la 
+total 12
+drwxr-xr-x 2 root root 4096 Feb 19 20:54 . 
+drwxrwxr-x 3 kali kali 4096 Jun 28 17:11 .. 
+-rw-r--r-- 1 root root 1751 Feb 19 20:53 New_Employee_Access.pdf
+```
+We find a single file, New_Employee_Access.pdf, which fits the "onboarding" theme and is likely to contain useful information for new employees — potentially credentials, instructions, or internal references.  
+We extract its text content directly to stdout using pdftotext, with - as the output argument telling it to print the result straight to the terminal instead of writing it to a file:  
+```
+pdftotext /home/kali/Desktop/HTB/Enigma/enigma_nfs/New_Employee_Access.pdf -
 ```
