@@ -106,4 +106,29 @@ We find a single file, New_Employee_Access.pdf, which fits the "onboarding" them
 We extract its text content directly to stdout using pdftotext, with - as the output argument telling it to print the result straight to the terminal instead of writing it to a file:  
 ```
 pdftotext /home/kali/Desktop/HTB/Enigma/enigma_nfs/New_Employee_Access.pdf -
+Enigma Corp IT Department - New Employee System Access
+Employee: Kevin Mitchell 
+Department: Operations
+Provisioned by: IT Department 
+Date: 2024-03-01 
+Webmail Access URL: http://mail001.enigma.htb 
+Username: <redacted>
+Password: <redacted>
+Please change your password upon first login. 
+For support contact: it@enigma.htb 
+This document contains confidential internal information intended solely for the recipient. 
+Unauthorized access, disclosure, or distribution is strictly prohibited. 
+Generated automatically by Enigma Corp Identity Management System.
 ```
+The document turns out to be an onboarding letter from Enigma Corp's IT department, containing webmail credentials for a new employee.  
+This gives us a new virtual host, mail001.enigma.htb, along with a set of credentials for a webmail portal. We add the host entry so we can resolve it:  
+```
+echo '<IP ADDRESS>    mail001.enigma.htb' | sudo tee -a /etc/hosts
+```
+Logging into the webmail portal with the credentials, we find it's running an outdated version, but a quick look doesn't reveal any obvious exploitable vulnerability in the interface itself.    
+Inside the inbox, there's a single email from sarah@enigma.htb. Since we already have valid credentials, it's worth checking whether the same password is reused for IMAP access:  
+```
+curl -ks --user 'sarah:<redacted>' 'imaps://<IP ADDRESS>/INBOX'
+* LIST (\HasNoChildren) "/" INBOX
+```
+The login succeeds, confirming password reuse.  
