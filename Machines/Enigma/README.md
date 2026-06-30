@@ -9,11 +9,11 @@
 | Difficulty | Easy |
 | Release Date | 27th June, 2026 |
 
-## Overview
+## Overview  
 
 
 
-## RECON
+## RECON  
 
 # Nmap 7.99 scan initiated Mon Jun 28 15:00:01 2026 as: /usr/lib/nmap/nmap -sC -sV -p- -oN nmap_enigma.txt <IP ADDRESS>  
 Nmap scan report for <IP ADDRESS>  
