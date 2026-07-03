@@ -1,4 +1,4 @@
-Just download the zip file and unzip.
+Just download the zip file and unzip it.
 ```
 7z x filename -p**********
 ```
@@ -22,7 +22,7 @@ ANDROID BACKUP
 1
 none
 
-This header takes up roughly 24 bytes (it depends on the version — sometimes you need to count it manually, including newlines). The dd command discards this header and copies everything else — i.e. the compressed data stream — into a new file called cat.ab.deflate.
+This header takes up roughly 24 bytes (it depends on the version, sometimes you need to count it manually, including newlines). The dd command discards this header and copies everything else, i.e. the compressed data stream into a new file called cat.ab.deflate.
 So after this command you've isolated the compressed binary "payload," without the initial text portion in front of it.
 ```
 python3 -c "import zlib; data=open('cat.ab.deflate','rb').read(); open('cat.tar','wb').write(zlib.decompress(data))"
