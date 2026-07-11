@@ -137,17 +137,6 @@ xmlrpc.php              [Status: 405, Size: 42, Words: 6, Lines: 1, Duration: 14
 Let's try those creds in the /wp-admin panel. And it works, but Jake has just a contributor role, can't publish shit.
 ```
 └─$ ffuf -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-110000.txt -H 'Host: FUZZ.makesense.htb' -u 'https://makesense.htb/' -ac 
-```
-
-        /'___\  /'___\           /'___\       
-       /\ \__/ /\ \__/  __  __  /\ \__/       
-       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\      
-        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/      
-         \ \_\   \ \_\  \ \____/  \ \_\       
-          \/_/    \/_/   \/___/    \/_/       
-
-       v2.1.0-dev
-________________________________________________
 
  :: Method           : GET
  :: URL              : https://makesense.htb/
@@ -158,15 +147,41 @@ ________________________________________________
  :: Timeout          : 10
  :: Threads          : 40
  :: Matcher          : Response status: 200-299,301,302,307,401,403,405,500
-________________________________________________
 
 fqbSrJhU                [Status: 301, Size: 0, Words: 1, Lines: 1, Duration: 149ms]
 
 ```
+```
 echo '<IPAddress>    fqbSrJhU.makesense.htb' | sudo tee -a /etc/hosts
 ```
 
-In the Contact Submissions we can list the voice recording file submittet by users. There should be a request to submit it. 
+Navigating to the Contact Submissions section in the WordPress admin panel, we can see voice recording files submitted by users. To understand how these files are uploaded, we intercept the traffic with Burp Suite while browsing to the subdomain fqbsrjhu.makesense.htb.
+In the page source, we find an inline JavaScript block that exposes the AJAX endpoint and a valid nonce:
+```
+<script id="whisper-wrapper-js-extra">
+var webagency_ajax = {"ajax_url":"https://makesense.htb/wp-admin/admin-ajax.php","nonce":"50fbeb8031","theme_url":"https://makesense.htb/wp-content/themes/webagency","site_url":"https://makesense.htb"};
+//# sourceURL=whisper-wrapper-js-extra
+</script>
+```
+This reveals that the voice recording feature communicates with admin-ajax.php using the save_voice_raw action. We can now replicate the browser's request directly with curl, bypassing the JavaScript frontend entirely.  
+
+We send a POST request to admin-ajax.php with the save_voice_raw action, attaching the voice recording file found earlier and the nonce extracted from the page source.
+```
+curl -sk -X POST https://makesense.htb/wp-admin/admin-ajax.php \                                        
+-F "action=save_voice_raw" \
+-F "nonce=50fbeb8031" \
+-F "voice_recording=@voice-message-2.wav"
+{"success":true,"data":{"message":"Audio saved, processing started.","post_id":77}}    
+```
+The server responds with a success message and a post_id, confirming that the endpoint accepts unauthenticated file uploads. The response also hints at a background processing pipeline - "processing started" - suggesting the audio is analyzed server-side after upload.  
+
+```                                                                 
+curl -sk "https://makesense.htb/index.php?rest_route=/wp/v2/media" | jq '.[0] | .source_url, .id'
+"https://makesense.htb/wp-content/uploads/2026/07/voice-message-2.wav"
+78
+```
+From Contact Submissions section in the admin panel, as jake, we can't do much. Just listing the submitted files and waiting for an admin to approve.
+
 
 
 
