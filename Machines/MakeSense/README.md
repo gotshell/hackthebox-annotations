@@ -68,14 +68,117 @@ echo '<IPAddress>    makesense.htb' | sudo tee -a /etc/hosts
 ```
 A WordPress website, use wpscan to find common vulns/misconfig.  
 ```
-wpscan --url https://makesense.htb --disable-tls-checks --enumerate p,t --no-update
+wpscan --url https://makesense.htb --disable-tls-checks --enumerate p,u --no-update
 ```
 ```
 --url https://makesense.htb - Specifies the target WordPress site URL to scan
 --disable-tls-checks - Disables SSL/TLS certificate verification (allows scanning sites with self-signed or invalid certificates)
 --enumerate p,t - Enumerates (lists and identifies) WordPress components:
 p = plugins installed on the site
-t = themes installed on the site
+u = users
 --no-update - Skips updating the vulnerability database before scanning (uses the existing local database to save time)
 ```
+[+] Upload directory has listing enabled: https://makesense.htb/wp-content/uploads/
+ | Found By: Direct Access (Aggressive Detection)
+ | Confidence: 100%
+
+Found one file only at the path: https://makesense.htb/wp-content/uploads/2026/01/voice-message.wav
+
+And some users.
+[+] jake
+ | Found By: Author Id Brute Forcing - Author Pattern (Aggressive Detection)
+ | Confirmed By: Login Error Messages (Aggressive Detection)
+
+[+] admin
+ | Found By: Author Id Brute Forcing - Author Pattern (Aggressive Detection)
+ | Confirmed By: Login Error Messages (Aggressive Detection)
+
+[+] walter
+ | Found By: Author Id Brute Forcing - Author Pattern (Aggressive Detection)
+ | Confirmed By: Login Error Messages (Aggressive Detection)
+
+
+Whisper is a state-of-the-art speech-to-text (automatic speech recognition) model developed by OpenAI. It is widely used to transcribe spoken audio into highly accurate written text. (You can also just slow down the media player speed to 0.5)
+```
+whisper voice-message.wav --model medium --language English
+```
+Hey, this is Jake. I'm testing the new feature, and it's exciting. I'm going there.  
+Oops. Login.  
+Um, Jake?  
+Clear.  
+L****.  
+N****.  
+S****.  
+F****.  
+N****.  
+T****.    
+T****.  
+
+It seems to be creds:   
+Jake:C****L*****N*****S********  
+
+Meanwhile let's search for directories/commonfiles and subdomains:
+```
+ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/common.txt -u 'https://makesense.htb/FUZZ' -ac
+```
+```
+.git/logs/              [Status: 200, Size: 34914, Words: 5289, Lines: 349, Duration: 276ms]
+.gitignore              [Status: 200, Size: 1055, Words: 49, Lines: 90, Duration: 72ms]
+cgi-bin/                [Status: 200, Size: 34914, Words: 5289, Lines: 349, Duration: 2199ms]
+javascript              [Status: 301, Size: 321, Words: 20, Lines: 10, Duration: 105ms]
+scripts                 [Status: 301, Size: 318, Words: 20, Lines: 10, Duration: 653ms]
+wp-admin                [Status: 301, Size: 319, Words: 20, Lines: 10, Duration: 539ms]
+wp-includes             [Status: 301, Size: 322, Words: 20, Lines: 10, Duration: 416ms]
+wp-content              [Status: 301, Size: 321, Words: 20, Lines: 10, Duration: 721ms]
+xmlrpc.php              [Status: 405, Size: 42, Words: 6, Lines: 1, Duration: 1459ms]
+:: Progress: [4750/4750] :: Job [1/1] :: 30 req/sec :: Duration: [0:02:59] :: Errors: 0 ::
+
+```
+Let's try those creds in the /wp-admin panel. And it works, but Jake has just a contributor role, can't publish shit.
+```
+└─$ ffuf -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-110000.txt -H 'Host: FUZZ.makesense.htb' -u 'https://makesense.htb/' -ac 
+```
+
+        /'___\  /'___\           /'___\       
+       /\ \__/ /\ \__/  __  __  /\ \__/       
+       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\      
+        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/      
+         \ \_\   \ \_\  \ \____/  \ \_\       
+          \/_/    \/_/   \/___/    \/_/       
+
+       v2.1.0-dev
+________________________________________________
+
+ :: Method           : GET
+ :: URL              : https://makesense.htb/
+ :: Wordlist         : FUZZ: /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-110000.txt
+ :: Header           : Host: FUZZ.makesense.htb
+ :: Follow redirects : false
+ :: Calibration      : true
+ :: Timeout          : 10
+ :: Threads          : 40
+ :: Matcher          : Response status: 200-299,301,302,307,401,403,405,500
+________________________________________________
+
+fqbSrJhU                [Status: 301, Size: 0, Words: 1, Lines: 1, Duration: 149ms]
+
+```
+echo '<IPAddress>    fqbSrJhU.makesense.htb' | sudo tee -a /etc/hosts
+```
+
+In the Contact Submissions we can list the voice recording file submittet by users. There should be a request to submit it. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
