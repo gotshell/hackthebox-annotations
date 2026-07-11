@@ -105,7 +105,7 @@ whisper voice-message.wav --model medium --language English
 Hey, this is Jake. I'm testing the new feature, and it's exciting. I'm going there.  
 Oops. Login.  
 Um, Jake?  
-Clear.  
+C****.  
 L****.  
 N****.  
 S****.  
@@ -115,7 +115,7 @@ T****.
 T****.  
 
 It seems to be creds:   
-Jake:C****L*****N*****S********  
+Jake:C****L****N****S********  
 
 Meanwhile let's search for directories/commonfiles and subdomains:
 ```
