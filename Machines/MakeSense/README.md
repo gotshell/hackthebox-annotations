@@ -205,7 +205,6 @@ curl -sk "https://makesense.htb/index.php?rest_route=/wp/v2/media" | jq '.[0] | 
 This request queries the WordPress REST API for the list of uploaded media files.  
 The `jq` filter selects the first item in the JSON array (`.[0]`) and prints its `source_url` (the file URL) and `id` (the media ID).  
 The output shows that the uploaded file `voice-message-2.wav` is publicly accessible and has media ID `78`.  
-When we upload the file, the post_id is 77 but the media ID after the upload is 78. 
 
 From Contact Submissions section in the admin panel, as jake, we can't do much. Just listing the submitted files and waiting for an admin to approve.
 There's should be a way to trigger the admin role to submit the file. 
