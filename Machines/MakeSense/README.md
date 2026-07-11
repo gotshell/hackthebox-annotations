@@ -44,3 +44,38 @@ MakeSense is a Linux machine that starts with a WordPress site where a voice rec
 13. SSH Local Port Forwarding
 14. OCR Service Abuse (Tesseract + PHP File Write)
 15. Root Access
+
+## RECON
+```
+sudo nmap -sV -p- <IPAddress>                       
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-07-10 11:51 +0200
+Nmap scan report for makesense.htb (10.129.28.244)
+Host is up (0.087s latency).
+Not shown: 65531 closed tcp ports (reset)
+PORT     STATE    SERVICE     VERSION
+22/tcp   open     ssh         OpenSSH 9.6p1 Ubuntu 3ubuntu13.16 (Ubuntu Linux; protocol 2.0)
+80/tcp   filtered http
+443/tcp  open     ssl/http    Apache httpd 2.4.58 ((Ubuntu))
+8001/tcp filtered vcom-tunnel
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 221.29 seconds
+```
+Nice, small attacking surface. Let's dive that webapp.
+```
+echo '<IPAddress>    makesense.htb' | sudo tee -a /etc/hosts
+```
+A WordPress website, use wpscan to find common vulns/misconfig.  
+```
+wpscan --url https://makesense.htb --disable-tls-checks --enumerate p,t --no-update
+```
+```
+--url https://makesense.htb - Specifies the target WordPress site URL to scan
+--disable-tls-checks - Disables SSL/TLS certificate verification (allows scanning sites with self-signed or invalid certificates)
+--enumerate p,t - Enumerates (lists and identifies) WordPress components:
+p = plugins installed on the site
+t = themes installed on the site
+--no-update - Skips updating the vulnerability database before scanning (uses the existing local database to save time)
+```
+
