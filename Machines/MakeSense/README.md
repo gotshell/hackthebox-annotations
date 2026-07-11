@@ -410,9 +410,14 @@ tcp                     LISTEN                   0              511             
 tcp                     LISTEN                   0              511                    0.0.0.0:443                                             0.0.0.0:*                                                
 tcp                     LISTEN                   0              4096                   127.0.0.53%lo:53                                              0.0.0.0:*                                                
 ```
-Port 8001 seems juicy.  
+Port 8001 seems juicy. The service also runs as root:
+```
+root        1411  0.0  0.7 228488 30652 ?        S    11:07   0:01 php -S 127.0.0.1:8001 -t /root/ocr4/
+```
 Next, we establish an SSH local port forward to securely access the internal service listening on port 8001 through the compromised host.  
 ```
 ssh -L 8001:127.0.0.1:8001 w*****@makesense.htb
 ```
+The internal service running on port 8001 is a PHP web application protected by HTTP Basic Authentication that provides an OCR interface powered by Tesseract. Users can draw text on an HTML canvas, which is then submitted as a base64-encoded PNG image, processed by Tesseract to extract the recognized text, and optionally saved to a file with a user-controlled filename.  
+
 
