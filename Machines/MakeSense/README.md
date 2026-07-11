@@ -420,7 +420,7 @@ ssh -L 8001:127.0.0.1:8001 w*****@makesense.htb
 ```
 The internal service running on port 8001 is a PHP web application protected by HTTP Basic Authentication that provides an OCR interface powered by Tesseract. Users can draw text on an HTML canvas, which is then submitted as a base64-encoded PNG image, processed by Tesseract to extract the recognized text, and optionally saved to a file with a user-controlled filename.  
 
-<img src="img/no.png" width="800">  
+<img src="img/no.png" width="600">  
 
 ```
 curl -sk http://127.0.0.1:8001/saved/no.php                                                    
