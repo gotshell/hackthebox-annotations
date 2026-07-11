@@ -49,7 +49,7 @@ MakeSense is a Linux machine that starts with a WordPress site where a voice rec
 ```
 sudo nmap -sV -p- <IPAddress>                       
 Starting Nmap 7.99 ( https://nmap.org ) at 2026-07-10 11:51 +0200
-Nmap scan report for makesense.htb (10.129.28.244)
+Nmap scan report for makesense.htb (<IPAddress>)
 Host is up (0.087s latency).
 Not shown: 65531 closed tcp ports (reset)
 PORT     STATE    SERVICE     VERSION
