@@ -399,16 +399,16 @@ cat /home/w*****/user.txt
 Now let's list all listening TCP and UDP sockets.
 ```
 ss -tulnp
-Netid                   State                    Recv-Q                   Send-Q                                     Local Address:Port                                       Peer Address:Port                   Process                   
-udp                     UNCONN                   0                        0                                             127.0.0.54:53                                              0.0.0.0:*                                                
-udp                     UNCONN                   0                        0                                          127.0.0.53%lo:53                                              0.0.0.0:*                                                
-udp                     UNCONN                   0                        0                                                0.0.0.0:68                                              0.0.0.0:*                                                
-tcp                     LISTEN                   0                        4096                                           127.0.0.1:8001                                            0.0.0.0:*                                                
-tcp                     LISTEN                   0                        4096                                          127.0.0.54:53                                              0.0.0.0:*                                                
-tcp                     LISTEN                   0                        4096                                             0.0.0.0:22                                              0.0.0.0:*                                                
-tcp                     LISTEN                   0                        511                                              0.0.0.0:80                                              0.0.0.0:*                                                
-tcp                     LISTEN                   0                        511                                              0.0.0.0:443                                             0.0.0.0:*                                                
-tcp                     LISTEN                   0                        4096                                       127.0.0.53%lo:53                                              0.0.0.0:*                                                
+Netid                   State                    Recv-Q         Send-Q                 Local Address:Port                                       Peer Address:Port                   Process                   
+udp                     UNCONN                   0              0                      127.0.0.54:53                                              0.0.0.0:*                                                
+udp                     UNCONN                   0              0                      127.0.0.53%lo:53                                              0.0.0.0:*                                                
+udp                     UNCONN                   0              0                      0.0.0.0:68                                              0.0.0.0:*                                                
+tcp                     LISTEN                   0              4096                   127.0.0.1:8001                                            0.0.0.0:*                                                
+tcp                     LISTEN                   0              4096                   127.0.0.54:53                                              0.0.0.0:*                                                
+tcp                     LISTEN                   0              4096                   0.0.0.0:22                                              0.0.0.0:*                                                
+tcp                     LISTEN                   0              511                    0.0.0.0:80                                              0.0.0.0:*                                                
+tcp                     LISTEN                   0              511                    0.0.0.0:443                                             0.0.0.0:*                                                
+tcp                     LISTEN                   0              4096                   127.0.0.53%lo:53                                              0.0.0.0:*                                                
 ```
 Port 8001 seems juicy.  
 Next, we establish an SSH local port forward to securely access the internal service listening on port 8001 through the compromised host.  
