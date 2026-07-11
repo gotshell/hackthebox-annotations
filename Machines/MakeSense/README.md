@@ -115,7 +115,7 @@ T****.
 T****.  
 
 It seems to be creds:   
-Jake:C****L****N****S********  
+Jake:C____L____N____S____F___ 
 
 Meanwhile let's search for directories/commonfiles and subdomains:
 ```
