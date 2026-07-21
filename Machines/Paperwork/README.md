@@ -84,6 +84,18 @@ The server extracts the queue name from the received data (skipping the first by
 Invalid queues result in a \x01 (error) response and connection termination.  
 Once a valid queue is accepted, the server enters a loop to receive file data:    
 The server expects a size value which dictates how many bytes of content to receive. This size is parsed from the incoming data after the subcommand byte.  
+#### Job Name Extraction & Injection Point
+Once a valid queue is accepted, the server processes incoming data and searches for a line starting with J:
+```
+job_name = "Unknown"
+for line in decoded_content.split('\n'):
+    line = line.strip()
+    if line.startswith('J'):
+        job_name = line[1:]
+        break
+```
+The J marker is part of the LPD protocol specification for designating the job name. Everything after the J character becomes the job_name variable. This is the critical injection point.  
+
 #### Command Injection Vulnerability  
 The critical vulnerability lies in the job name extraction and execution:  
 ```
