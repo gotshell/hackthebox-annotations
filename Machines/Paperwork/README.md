@@ -16,7 +16,7 @@ After gaining initial access as the lp user through LPD exploitation, privilege 
 ## Attack Chain    
 Reconnaissance: Discover LPD service on port 1515 with a custom "Archive_Printer" processor  
 Exploitation: Forge LPD protocol messages with shell metacharacters to inject arbitrary bash commands  
-Initial Access: Achieve RCE as lp user via shell injection in job name processing  
+Initial Access: Achieve RCE as ** user via shell injection in job name processing  
 Privilege Escalation: Exploit insecure file permissions to escalate to root  
 Post-Exploitation: Flag capture and system compromise  
 
