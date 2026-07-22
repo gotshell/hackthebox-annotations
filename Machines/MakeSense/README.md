@@ -134,7 +134,7 @@ xmlrpc.php              [Status: 405, Size: 42, Words: 6, Lines: 1, Duration: 14
 :: Progress: [4750/4750] :: Job [1/1] :: 30 req/sec :: Duration: [0:02:59] :: Errors: 0 ::
 
 ```
-Let's try those creds in the /wp-admin panel. And it works, but Jake has just a contributor role, can't publish shit.
+Let's try those creds in the /wp-admin panel, and it works, but Jake has just a contributor role, can't publish shit.
 ```
 └─$ ffuf -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-110000.txt -H 'Host: FUZZ.makesense.htb' -u 'https://makesense.htb/' -ac 
 
