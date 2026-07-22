@@ -10,24 +10,29 @@
 | Release Date | 11th July, 2026 |
 
 ## Overview
-Paperwork is a Linux machine that exploits vulnerabilities in an LPD (Line Printer Daemon) service running on port 1515. The service implements the RFC 1179 protocol but fails to sanitize user input, leading to shell injection via a command construction vulnerability. 
-After gaining initial access as the lp user through LPD exploitation, privilege escalation is achieved by abusing file permissions on critical binaries that are executed by root processes.  
+Paperwork is a Linux machine that chains together multiple vulnerabilities in custom printing services. Initial access is obtained by exploiting command injection in an LPD service implementing RFC 1179. A vulnerable JetDirect service is then abused to perform a path traversal attack and gain SSH access as the archivist user. Finally, an insecure Unix domain socket leaking file descriptors via SCM_RIGHTS is exploited to recover administrator credentials and escalate privileges to root.  
 
 ## Attack Chain    
-Reconnaissance: Discover LPD service on port 1515 with a custom "Archive_Printer" processor  
-Exploitation: Forge LPD protocol messages with shell metacharacters to inject arbitrary bash commands  
-Initial Access: Achieve RCE as ** user via shell injection in job name processing  
-Privilege Escalation: Exploit insecure file permissions to escalate to root  
-Post-Exploitation: Flag capture and system compromise  
+Reconnaissance: Discovered an LPD service on port 1515 using a custom Archive_Printer processor.  
+Exploitation: Crafted malicious LPD protocol messages containing shell metacharacters to achieve command injection.  
+Initial Access: Achieved remote code execution (RCE) as the lp user through shell injection in the job name processing.  
+Lateral Movement: Exploited a path traversal vulnerability in the JetDirect service to write a public SSH key into the archivist user's ~/.ssh/authorized_keys file, obtaining SSH access.  
+Privilege Escalation: Exploited an insecure Unix domain socket that leaked file descriptors via SCM_RIGHTS, allowing the recovery of the administrator credentials and escalation to root.  
+Post-Exploitation: Flag capture.  
 
-## Skills / Techniques  
-Network Service Enumeration (LPD/RFC 1179)  
-Protocol Analysis & Packet Crafting  
-Shell Injection & Command Injection  
-Python Socket Programming  
-Reverse Shell Payload Construction  
-Privilege Escalation via File Permissions  
-Bash/Shell Exploitation  
+## Skills / Techniques   
+Network Service Enumeration (LPD / RFC 1179)
+Protocol Analysis & Packet Crafting
+Command Injection via Shell Metacharacters
+Python Socket Programming
+Reverse Shell Payload Development
+Path Traversal Exploitation
+PJL (Printer Job Language) Abuse
+SSH Authorized Keys Injection
+Unix Domain Socket Exploitation
+File Descriptor Leakage (SCM_RIGHTS)
+Linux Privilege Escalation
+Bash/Shell Scripting
 
 ## RECON 
 ```
